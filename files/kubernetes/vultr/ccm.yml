@@ -1,0 +1,74 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vultr-ccm
+  namespace: kube-system
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: system:vultr-ccm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: cluster-admin
+subjects:
+  - kind: ServiceAccount
+    name: vultr-ccm
+    namespace: kube-system
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: vultr-ccm
+  labels:
+    app: vultr-ccm
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: vultr-ccm
+  template:
+    metadata:
+      labels:
+        app: vultr-ccm
+    spec:
+      serviceAccountName: vultr-ccm
+      nodeSelector:
+        "node-role.kubernetes.io/master": ""
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          effect: NoSchedule
+        - key: "CriticalAddonsOnly"
+          operator: "Exists"
+        - key: "node.cloudprovider.kubernetes.io/uninitialized"
+          value: "true"
+          effect: "NoSchedule"
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoSchedule
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoSchedule
+      hostNetwork: true
+      containers:
+        - image: vultr/vultr-cloud-controller-manager:v0.0.2
+          name: vultr-cloud-controller-manager
+          command:
+            - "/vultr-cloud-controller-manager"
+            - "--cloud-provider=vultr"
+            - "--allow-untagged-cloud=true"
+            - "--authentication-skip-lookup=true"
+            - "--v=3"
+          env:
+            - name: VULTR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: vultr-ccm
+                  key: api-key
+            - name: VULTR_REGION
+              valueFrom:
+                secretKeyRef:
+                  name: vultr-ccm
+                  key: region
+
