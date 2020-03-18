@@ -1,1 +1,0 @@
-kubeadm join 140.82.44.89:6443 --token xr1j1x.1bybi8tw3fwyor4b     --discovery-token-ca-cert-hash sha256:a8671ebbf556d8f3291ef2a6f4b3be1e97019148a39486de5ecacdfcca822742 
