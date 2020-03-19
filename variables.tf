@@ -18,10 +18,6 @@ variable "worker_count" {
   type = number
 }
 
-variable "cluster_domain" {
-  type = string
-}
-
 variable "controller_plan" {
   type = string
 }
