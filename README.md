@@ -8,7 +8,7 @@ $ export TF_VAR_ccm_api_key=ANOTHEREXAMPLEAPIKEYABCXYZ # You can re-use your Ter
 ```
 # main.tf
 module "cluster" {
-  source          = "git::https://github.com/vultr/k8-tf?ref=master"
+  source          = "git::https://github.com/vultr/terraform-kubernetes-vultr?ref=master"
 
   vultr_ccm_image  = "vultr/vultr-cloud-controller-manager:v0.0.2"
   ccm_api_key      = var.ccm_api_key                       # Should configure as environment variable and define in variables.tf
