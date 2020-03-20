@@ -48,6 +48,8 @@ resource "vultr_server" "controllers" {
 resource "null_resource" "controller_provisioner" {
   count = length(vultr_server.controllers.*.id)
 
+  depends_on = [vultr_server.controllers]
+
   triggers = {
     controller_ids = join(",", vultr_server.controllers.*.id)
   }
@@ -130,19 +132,6 @@ resource "null_resource" "controller_provisioner" {
       "kubectl apply -f $HOME/vultr/ccm.yml",
       "kubeadm token create --print-join-command > /root/join-command",
     ]
-  }
-}
-
-resource "null_resource" "join_token" {
-  depends_on = [null_resource.controller_provisioner]
-
-  count = length(vultr_server.controllers.*.id)
-  
-  connection {
-    type     = "ssh"
-    host     = vultr_server.controllers[count.index].main_ip
-    user     = "root"
-    password = vultr_server.controllers[count.index].default_password
   }
 
   provisioner "local-exec" {

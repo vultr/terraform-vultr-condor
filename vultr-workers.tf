@@ -1,4 +1,6 @@
 resource "vultr_server" "workers" {
+  depends_on = [null_resource.controller_provisioner]
+
   count			 = var.worker_count 
   plan_id		 = data.vultr_plan.worker_plan.id
   region_id		 = data.vultr_region.cluster_region.id
@@ -46,7 +48,7 @@ resource "vultr_server" "workers" {
 }
 
 resource "null_resource" "worker_provisioner" {
-  depends_on = [null_resource.join_token]
+  depends_on = [vultr_server.workers]
 
   count = length(vultr_server.controllers.*.id)
 
