@@ -28,12 +28,12 @@ resource "vultr_server" "controllers" {
   }
 
   provisioner "file" {
-    content     = templatefile("./files/network/00-eth1.network.tpl", { PRIVATE_IP=self.internal_ip })
+    content     = templatefile("${path.module}/files/network/00-eth1.network.tpl", { PRIVATE_IP=self.internal_ip })
     destination = "/etc/systemd/network/00-eth1.network"
   }
 
   provisioner "file" {
-    source      = "./files/network/00-eth0.network"
+    source      = "${path.module}/files/network/00-eth0.network"
     destination = "/etc/systemd/network/00-eth0.network"
   }
 
@@ -74,22 +74,22 @@ resource "null_resource" "controller_provisioner" {
   }
 
   provisioner "file" {
-    source      = "./files/docker/daemon.json"
+    source      = "${path.module}/files/docker/daemon.json"
     destination = "/etc/docker/daemon.json" 
   }
 
   provisioner "file" {
-    source      = "./files/kubernetes/kubernetes.repo"
+    source      = "${path.module}/files/kubernetes/kubernetes.repo"
     destination = "/etc/yum.repos.d/kubernetes.repo"
   }
 
   provisioner "file" {
-    source      = "./files/kubernetes/kubelet-extra-args"
+    source      = "${path.module}/files/kubernetes/kubelet-extra-args"
     destination = "/etc/sysconfig/kubelet"
   }
 
   provisioner "file" {
-    source      = "./files/kubernetes/k8s.conf"
+    source      = "${path.module}/files/kubernetes/k8s.conf"
     destination = "/etc/sysctl.d/k8s.conf"
   }
 
@@ -110,12 +110,12 @@ resource "null_resource" "controller_provisioner" {
   }
 
   provisioner "file" {
-    content      = templatefile("./files/kubernetes/vultr/api-key.yml.tpl", {CCM_API_KEY = var.ccm_api_key, CLUSTER_REGION = data.vultr_region.cluster_region.id })
+    content      = templatefile("${path.module}/files/kubernetes/vultr/api-key.yml.tpl", {CCM_API_KEY = var.ccm_api_key, CLUSTER_REGION = data.vultr_region.cluster_region.id })
     destination  = "/root/vultr/api-key.yml"
   }
 
   provisioner "file" {
-    source      = "./files/kubernetes/vultr/ccm.yml"
+    source      = "${path.module}/files/kubernetes/vultr/ccm.yml"
     destination = "/root/vultr/ccm.yml"
   }
 
@@ -146,6 +146,12 @@ resource "null_resource" "join_token" {
   }
 
   provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[count.index].main_ip}:/root/join-command ./files/remote"
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[count.index].main_ip}:/root/join-command ${path.module}/files/remote"
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "rm -f /root/join-command",
+    ]
   }  
 }

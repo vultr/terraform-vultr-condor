@@ -28,12 +28,12 @@ resource "vultr_server" "workers" {
   }
 
   provisioner "file" {
-    content     = templatefile("./files/network/00-eth1.network.tpl", { PRIVATE_IP=self.internal_ip })
+    content     = templatefile("${path.module}/files/network/00-eth1.network.tpl", { PRIVATE_IP=self.internal_ip })
     destination = "/etc/systemd/network/00-eth1.network"
   }
 
   provisioner "file" {
-    source      = "./files/network/00-eth0.network"
+    source      = "${path.module}/files/network/00-eth0.network"
     destination = "/etc/systemd/network/00-eth0.network"
   }
 
@@ -76,22 +76,22 @@ resource "null_resource" "worker_provisioner" {
   }
 
   provisioner "file" {
-    source      = "./files/docker/daemon.json"
+    source      = "${path.module}/files/docker/daemon.json"
     destination = "/etc/docker/daemon.json" 
   }
 
   provisioner "file" {
-    source      = "./files/kubernetes/kubernetes.repo"
+    source      = "${path.module}/files/kubernetes/kubernetes.repo"
     destination = "/etc/yum.repos.d/kubernetes.repo"
   }
 
   provisioner "file" {
-    source      = "./files/kubernetes/kubelet-extra-args"
+    source      = "${path.module}/files/kubernetes/kubelet-extra-args"
     destination = "/etc/sysconfig/kubelet"
   }
 
   provisioner "file" {
-    source      = "./files/kubernetes/k8s.conf"
+    source      = "${path.module}/files/kubernetes/k8s.conf"
     destination = "/etc/sysctl.d/k8s.conf"
   }
 
@@ -111,7 +111,7 @@ resource "null_resource" "worker_provisioner" {
 
   provisioner "remote-exec" {
     inline = [
-      "${file("./files/remote/join-command")}"
+      "${file("${path.module}/files/remote/join-command")}"
     ]
   }
 }
