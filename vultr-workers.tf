@@ -12,7 +12,7 @@ resource "vultr_server" "workers" {
     type           = "ssh"
     host           = self.main_ip
     user           = "root"
-    private_key    = file("/root/.ssh/id_rsa")
+    private_key    = file("~/.ssh/id_rsa")
   }
 
   provisioner "remote-exec" {

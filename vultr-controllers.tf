@@ -12,7 +12,7 @@ resource "vultr_server" "controllers" {
     type           = "ssh"
     host           = self.main_ip
     user           = "root"
-    private_key    = file("/root/.ssh/id_rsa")
+    private_key    = file("~/.ssh/id_rsa")
   }
 
   provisioner "remote-exec" {
@@ -113,12 +113,12 @@ resource "null_resource" "controller_provisioner" {
 
   provisioner "file" {
     content      = templatefile("${path.module}/files/kubernetes/vultr/api-key.yml.tpl", {CCM_API_KEY = var.ccm_api_key, CLUSTER_REGION = data.vultr_region.cluster_region.id })
-    destination  = "/root/vultr/api-key.yml"
+    destination  = "~/vultr/api-key.yml"
   }
 
   provisioner "file" {
     source      = "${path.module}/files/kubernetes/vultr/ccm.yml"
-    destination = "/root/vultr/ccm.yml"
+    destination = "~/vultr/ccm.yml"
   }
 
   provisioner "remote-exec" {
@@ -130,17 +130,17 @@ resource "null_resource" "controller_provisioner" {
       "kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml",
       "kubectl apply -f $HOME/vultr/api-key.yml",
       "kubectl apply -f $HOME/vultr/ccm.yml",
-      "kubeadm token create --print-join-command > /root/join-command",
+      "kubeadm token create --print-join-command > ~/join-command",
     ]
   }
 
   provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[count.index].main_ip}:/root/join-command ${path.module}/files/remote"
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[count.index].main_ip}:~/join-command ${path.module}/files/remote"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "rm -f /root/join-command",
+      "rm -f ~/join-command",
     ]
   }  
 }
