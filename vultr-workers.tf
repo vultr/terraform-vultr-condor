@@ -48,10 +48,10 @@ resource "vultr_server" "workers" {
 resource "null_resource" "worker_provisioner" {
   depends_on = [null_resource.controller_provisioner]
 
-  count = length(vultr_server.controllers.*.id)
+  count = length(vultr_server.workers.*.id)
 
   triggers = {
-    controller_ids = join(",", vultr_server.workers.*.id)
+    worker_id = vultr_server.workers[count.index].id  
   }
 
   connection {
