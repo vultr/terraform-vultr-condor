@@ -31,6 +31,7 @@ variable "ccm_api_key" {
 ```
 3. Deploy the cluster
 ```
+$ terraform init
 $ terraform apply
 ```
 
