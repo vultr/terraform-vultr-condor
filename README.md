@@ -1,6 +1,12 @@
 # k8-tf
 
-#### Import as module:
+#### Usage:
+1. Export your Vultr API Keys as an environment variable:
+```
+$ export VULTR_API_KEY=EXAMPLEAPIKEYABCXYZ
+$ export TF_VAR_ccm_api_key=ANOTHEREXAMPLEAPIKEYABCXYZ # You can re-use your Terraform API key, however I prefer a separate Kubernetes sub-user API Key.
+```
+2. Create `main.tf` and `variables.tf` files with the following(adjust parameters as necessary). 
 ```
 # main.tf
 module "cluster" {
@@ -19,10 +25,14 @@ module "cluster" {
   docker_release   = "19.03.4"
   pod_network_cidr = "10.244.0.0/16"                       # Flannel 
 }
+
+# variables.tf
+variable "ccm_api_key" {
+  type = string
+}
 ```
-### Create cluster
+3. Deploy the cluster
 ```
-$ export TF_VAR_ccm_api_key=EXAMPLEAPIKEYABCXYZ
 $ terraform apply
 ```
 
