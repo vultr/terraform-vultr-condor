@@ -1,5 +1,3 @@
-# k8-tf
-
 #### Usage:
 1. Export your Vultr API Keys as an environment variable:
 ```
