@@ -138,6 +138,10 @@ resource "null_resource" "controller_provisioner" {
     command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[count.index].main_ip}:~/join-command ${path.module}/files/remote"
   }
 
+  provisioner "local-exec" {
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[count.index].main_ip}:~/.kube/config admin.config"
+  }
+
   provisioner "remote-exec" {
     inline = [
       "rm -f ~/join-command",

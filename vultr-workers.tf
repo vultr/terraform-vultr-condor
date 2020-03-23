@@ -43,23 +43,6 @@ resource "vultr_server" "workers" {
       "systemctl restart systemd-networkd systemd-resolved",
     ]  
   }
-}
-
-resource "null_resource" "worker_provisioner" {
-  depends_on = [null_resource.controller_provisioner]
-
-  count = length(vultr_server.workers.*.id)
-
-  triggers = {
-    worker_id = vultr_server.workers[count.index].id  
-  }
-
-  connection {
-    type     = "ssh"
-    host     = vultr_server.workers[count.index].main_ip
-    user     = "root"
-    password = vultr_server.workers[count.index].default_password
-  }
 
   provisioner "remote-exec" {
     inline = [ 
@@ -107,6 +90,23 @@ resource "null_resource" "worker_provisioner" {
       "sysctl --system",
       "systemctl enable kubelet",
     ]
+  }
+}
+
+resource "null_resource" "worker_provisioner" {
+  depends_on = [null_resource.controller_provisioner]
+
+  count = length(vultr_server.workers.*.id)
+
+  triggers = {
+    worker_id = vultr_server.workers[count.index].id  
+  }
+
+  connection {
+    type     = "ssh"
+    host     = vultr_server.workers[count.index].main_ip
+    user     = "root"
+    password = vultr_server.workers[count.index].default_password
   }
 
   provisioner "remote-exec" {
