@@ -1,11 +1,11 @@
 #### Usage:
 1. Export your Vultr API Keys as an environment variable:
-```
+```sh
 $ export VULTR_API_KEY=EXAMPLEAPIKEYABCXYZ
 $ export TF_VAR_ccm_api_key=ANOTHEREXAMPLEAPIKEYABCXYZ # You can re-use your Terraform API key, however I prefer a separate Kubernetes sub-user API Key.
 ```
 2. Create `main.tf` and `variables.tf` files with the following(adjust parameters as necessary). 
-```
+```hcl
 # main.tf
 module "cluster" {
   source          = "git::https://github.com/vultr/terraform-kubernetes-vultr?ref=master"
@@ -30,7 +30,7 @@ variable "ccm_api_key" {
 }
 ```
 3. Deploy the cluster
-```
+```sh
 $ terraform init
 $ terraform apply
 ```
