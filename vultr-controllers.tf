@@ -100,6 +100,7 @@ resource "null_resource" "controller_provisioner" {
       "set -euxo",
       "mkdir -p /etc/systemd/system/docker.service.d",
       "systemctl daemon-reload",
+      "systemctl enable docker",
       "systemctl restart docker",
       "yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes",
       "systemctl disable firewalld",
