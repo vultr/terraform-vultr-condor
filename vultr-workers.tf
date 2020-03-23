@@ -91,6 +91,10 @@ resource "vultr_server" "workers" {
       "systemctl enable kubelet",
     ]
   }
+
+  lifecycle {
+    create_before_destroy = true
+  }
 }
 
 resource "null_resource" "worker_provisioner" {
