@@ -1,10 +1,10 @@
 resource "vultr_server" "workers" {
-  count			 = var.worker_count 
+  count			 = terraform.workspace == "default" ? var.worker_count : 2
   plan_id		 = data.vultr_plan.worker_plan.id
   region_id		 = data.vultr_region.cluster_region.id
   os_id			 = data.vultr_os.cluster_os.id
-  hostname		 = "${var.cluster_name}-worker-${count.index}"
-  label			 = "${var.cluster_name}-worker-${count.index}"
+  hostname		 = terraform.workspace == "default" ? "${var.cluster_name}-worker-${count.index}" : "${var.cluster_name}-${terraform.workspace}-worker-${count.index}"
+  label			 = terraform.workspace == "default" ? "${var.cluster_name}-worker-${count.index}" : "${var.cluster_name}-${terraform.workspace}-worker-${count.index}"
   network_ids		 = [vultr_network.cluster_network.id]
   ssh_key_ids            = [vultr_ssh_key.provisioner.id]
 

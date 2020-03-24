@@ -3,8 +3,8 @@ resource "vultr_server" "controllers" {
   plan_id		 = data.vultr_plan.controller_plan.id
   region_id		 = data.vultr_region.cluster_region.id
   os_id			 = data.vultr_os.cluster_os.id
-  hostname		 = "${var.cluster_name}-controller-${count.index}"
-  label			 = "${var.cluster_name}-controller-${count.index}"
+  hostname		 = terraform.workspace == "default" ? "${var.cluster_name}-controller-${count.index}" : "${var.cluster_name}-${terraform.workspace}-controller-${count.index}"
+  label			 = terraform.workspace == "default" ? "${var.cluster_name}-controller-${count.index}" : "${var.cluster_name}-${terraform.workspace}-controller-${count.index}"
   network_ids		 = [vultr_network.cluster_network.id]
   ssh_key_ids            = [vultr_ssh_key.provisioner.id]
 
