@@ -35,5 +35,24 @@ resource "null_resource" "cluster_init" {
   }
 }
 
+resource "null_resource" "controller_join" {
+  depends_on = [null_resource.cluster_init]
+
+  count = var.controller_count > 1 ? var.controller_count-1 : 0
+
+  connection {
+    type     = "ssh"
+    host     = vultr_server.controllers[count.index+1].main_ip
+    user     = "root"
+    password = vultr_server.controllers[count.index+1].default_password
+  }
+
+  provisioner "remote-exec" {
+    script = "${path.module}/scripts/controller/remote/ha-controller-join.sh"
+  }
+}
+
+
+
 
 
