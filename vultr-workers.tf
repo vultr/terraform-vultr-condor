@@ -83,6 +83,7 @@ resource "vultr_server" "workers" {
       "set -euxo",
       "mkdir -p /etc/systemd/system/docker.service.d",
       "systemctl daemon-reload",
+      "systemctl enable docker",
       "systemctl restart docker",
       "yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes",
       "systemctl disable firewalld",
