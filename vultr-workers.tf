@@ -16,90 +16,12 @@ resource "vultr_server" "workers" {
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "set -euxo",
-      "yum -y install systemd-networkd systemd-resolved",
-      "systemctl disable network NetworkManager",
-      "systemctl enable systemd-networkd systemd-resolved",
-      "rm -f /etc/resolv.conf",
-      "ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf",
-      "mkdir /etc/systemd/network/",  
-    ]
-  }
-
-  provisioner "file" {
-    content     = templatefile("${path.module}/files/network/00-eth1.network.tpl", { PRIVATE_IP=self.internal_ip })
-    destination = "/etc/systemd/network/00-eth1.network"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/files/network/00-eth0.network"
-    destination = "/etc/systemd/network/00-eth0.network"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "set -euxo",
-      "systemctl restart systemd-networkd systemd-resolved",
-    ]  
-  }
-
-  provisioner "remote-exec" {
-    inline = [ 
-      "set -euxo",
-      "yum -y update",
-#      "setenforce 0",
-#      "sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config",
-      "yum install -y yum-utils device-mapper-persistent-data",
-      "yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo",
-      "yum -y update",
-      "yum -y install containerd.io-1.2.10 docker-ce-${var.docker_release} docker-ce-${var.docker_release}",
-      "mkdir /etc/docker",
-    ]
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/files/docker/daemon.json"
-    destination = "/etc/docker/daemon.json" 
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/files/kubernetes/kubernetes.repo"
-    destination = "/etc/yum.repos.d/kubernetes.repo"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/files/kubernetes/kubelet-extra-args"
-    destination = "/etc/sysconfig/kubelet"
-  }
-
-  provisioner "file" {
-    source      = "${path.module}/files/kubernetes/k8s.conf"
-    destination = "/etc/sysctl.d/k8s.conf"
-  }
-
-  provisioner "remote-exec" {
-    inline = [
-      "set -euxo",
-      "mkdir -p /etc/systemd/system/docker.service.d",
-      "systemctl daemon-reload",
-      "systemctl enable docker",
-      "systemctl restart docker",
-      "yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes",
-      "systemctl disable firewalld",
-      "systemctl stop firewalld",
-      "sysctl --system",
-      "systemctl enable kubelet",
-    ]
-  }
-
-  lifecycle {
-    create_before_destroy = true
+    script = "${path.module}/scripts/common/remote/common-provisioner.sh"
   }
 }
 
-resource "null_resource" "worker_provisioner" {
-  depends_on = [null_resource.controller_provisioner]
+resource "null_resource" "worker_join" {
+  depends_on = [null_resource.cluster_cluster_init]
 
   count = length(vultr_server.workers.*.id)
 
@@ -115,9 +37,7 @@ resource "null_resource" "worker_provisioner" {
   }
 
   provisioner "remote-exec" {
-    inline = [
-      "${file("${path.module}/files/remote/join-command")}"
-    ]
+    script = "${path.module}/scripts/worker/remote/worker-join.sh"
   }
 }
 
