@@ -16,7 +16,7 @@ DOCKER_RELEASE="$1"
 CONTAINERD_RELEASE="$2"
 
 pre_dependencies(){
-	apt -y install gnupg2 iptables arptables ebtables apt-transport-https
+	apt -y install gnupg2 iptables arptables ebtables
 
 	cat <<-EOF > /etc/sysctl.d/k8s.conf
 		net.bridge.bridge-nf-call-ip6tables = 1
@@ -70,7 +70,7 @@ install_k8(){
 
 install_docker(){
 	apt -y update
-	apt-transport-https ca-certificates curl gnupg2 software-properties-common
+	apt -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common
 
 	curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
