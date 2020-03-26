@@ -8,6 +8,10 @@ resource "vultr_server" "workers" {
   network_ids		 = [vultr_network.cluster_network.id]
   ssh_key_ids            = [vultr_ssh_key.provisioner.id]
 
+  lifecycle {
+    create_before_destroy = true
+  }
+
   connection {
     type           = "ssh"
     host           = self.main_ip
@@ -21,7 +25,7 @@ resource "vultr_server" "workers" {
   }
 
   provisioner "remote-exec" {
-    inline = [ "chmod +x /tmp/common-provisioner.sh", "/tmp/common-provisioner.sh ${var.docker_release} ${var.containerd_release}" ]
+    inline = [ "set -euxo", "chmod +x /tmp/common-provisioner.sh", "/tmp/common-provisioner.sh ${var.docker_release} ${var.containerd_release}" ]
   }
 }
 

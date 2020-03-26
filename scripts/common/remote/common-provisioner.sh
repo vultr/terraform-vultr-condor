@@ -2,6 +2,11 @@
 
 set -euxo posix
 
+if [ "$#" -ne 2 ]; then
+	echo "common-provisioner.sh requires 2 parameters"
+	exit 1
+fi
+
 apt -y update
 apt -y install jq
 
@@ -99,11 +104,6 @@ clean(){
 }
 
 main(){
-	if [ "$#" -ne 2 ]; then
-		echo "common-provisioner.sh requires 2 parameters"
-		exit 1
-	fi
-
 	pre_dependencies
 
 	network_config
