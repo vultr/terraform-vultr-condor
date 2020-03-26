@@ -1,0 +1,1 @@
+kubeadm join 8.9.3.123:6443 --token 6efmv4.mp8s6t343t6xngt6     --discovery-token-ca-cert-hash sha256:c360b35229d3e366a2d0d372e0b6abec1264f9551cd661a6b92c6f3cd7f7c5ca

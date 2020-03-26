@@ -1,10 +1,15 @@
 variable "vultr_ccm_image_release" {
   type    = string
-  default = "v0.0.2"
+  default = "latest"
 }
 
 variable "cluster_api_key" {
   type = string
+}
+
+variable "cluster_cni" {
+  type = string
+  default = "https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
 }
 
 variable "cluster_name" {

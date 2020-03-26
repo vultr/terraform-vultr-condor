@@ -29,8 +29,7 @@ resource "vultr_server" "workers" {
   }
 }
 
-/*
-resource "null_resource" "worker_join" {
+resource "null_resource" "get_join_command" {
   depends_on = [null_resource.cluster_cluster_init]
 
   count = length(vultr_server.workers.*.id)
@@ -41,13 +40,55 @@ resource "null_resource" "worker_join" {
 
   connection {
     type     = "ssh"
+    host     = vultr_server.controllers[0].main_ip
+    user     = "root"
+    password = vultr_server.controllers[0].default_password
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "mkdir ~/join",
+      "kubeadm token create --print-join-command > ~/join/worker-${count.index}-join",
+    ]
+  }
+
+  provisioner "local-exec" {
+    command = "scp root@${vultr_server.controllers[0].main_ip}:~/join/worker-${count.index}-join ${path.module}/scripts/worker/local/worker-${count.index}-join"
+  }
+}
+
+resource "null_resource" "worker_join" {
+  depends_on = [null_resource.get_join_command[count.index]]
+
+  count = length(vultr_server.workers.*.id)
+
+  triggers = {
+    worker_id = vultr_server.workers[count.index].id
+  }
+
+  connection {
+    type     = "ssh"
     host     = vultr_server.workers[count.index].main_ip
     user     = "root"
     password = vultr_server.workers[count.index].default_password
   }
 
   provisioner "remote-exec" {
-    script = "${path.module}/scripts/worker/remote/worker-join.sh"
+    inline = [ file("${path.module}/scripts/worker/local/worker-${count.index}-join") ]
+  }
+
+  provisioner "remote-exec" {
+
+    connection {
+      type     = "ssh"
+      host     = vultr_server.controllers[0].main_ip
+      user     = "root"
+      password = vultr_server.controllers[0].default_password
+    }
+
+    inline = [
+      "kubeadm token delete $(cat join/worker-${count.index}-join | awk '{print $5}')",
+      "rm -f ~/join/worker-${count.index}-join",      
+    ]
   }
 }
-*/
