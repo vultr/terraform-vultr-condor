@@ -58,7 +58,7 @@ resource "null_resource" "get_join_command" {
 }
 
 resource "null_resource" "worker_join" {
-  depends_on = [null_resource.get_join_command[count.index]]
+  depends_on = [null_resource.get_join_command]
 
   count = length(vultr_server.workers.*.id)
 
