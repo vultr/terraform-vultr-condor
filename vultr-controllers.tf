@@ -48,7 +48,7 @@ resource "null_resource" "cluster_init" {
 
   provisioner "file" {
     content    = templatefile("${path.module}/templates/vultr/api-key.yml.tpl", { CLUSTER_API_KEY = var.cluster_api_key, CLUSTER_REGION = data.vultr_region.cluster_region.id }) 
-    dstination = "~/vultr/api-key.yml"
+    destination = "~/vultr/api-key.yml"
   }
 }
 
