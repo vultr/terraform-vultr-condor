@@ -25,9 +25,8 @@ resource "vultr_server" "controllers" {
   }
 }
 
-/*
 resource "null_resource" "cluster_init" {
-  depends_on = [vultr_server.controllers]
+  depends_on = [vultr_server.controllers[0]]
 
   connection {
     type     = "ssh"
@@ -36,16 +35,11 @@ resource "null_resource" "cluster_init" {
     password = vultr_server.controllers[0].default_password
   }
 
-  provisioner "file" {
-    source      = "${path.module}/scripts/controller/remote/"
-    destination = "/tmp/scripts/"
-  }
-
   provisioner "remote-exec" {
-    script = "${path.module}/scripts/controller/remote/cluster-init.sh"
+    inline = [ "set -euxo", "kubeadm init --api-advertise-address=0.0.0.0 --pod-network-cidr=${var.pod_network_cidr}" ]
   }
 }
-*/
+
 
 
 

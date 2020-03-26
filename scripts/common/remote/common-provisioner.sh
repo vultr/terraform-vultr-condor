@@ -100,7 +100,7 @@ install_docker(){
 }
 
 clean(){
-	rm -f $(pwd)/common-provisioner.sh
+	rm -f /tmp/common-provisioner.sh
 }
 
 main(){
