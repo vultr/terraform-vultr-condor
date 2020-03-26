@@ -36,7 +36,7 @@ resource "null_resource" "cluster_init" {
   }
 
   provisioner "remote-exec" {
-    inline = [ "set -euxo", "kubeadm init --api-advertise-address=0.0.0.0 --pod-network-cidr=${var.pod_network_cidr}" ]
+    inline = [ "set -euxo", "kubeadm init --apiserver-advertise-address=0.0.0.0 --pod-network-cidr=${var.pod_network_cidr}" ]
   }
 }
 
