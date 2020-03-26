@@ -22,7 +22,7 @@ data "vultr_region" "cluster_region" {
 data "vultr_os" "cluster_os" {
   filter {
     name   = "name"
-1    values = [var.cluster_os]
+    values = [var.cluster_os]
   }
 }
 
