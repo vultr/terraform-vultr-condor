@@ -25,7 +25,7 @@ $ terraform validate
 $ terraform apply
 ```
 
-#### Optional module parameters and defaults
+#### Optional module parameters and defaults:
 ```
 vultr_ccm_release  - default: "latest" (If specifying a version use the form `vX.Y.Z`)
 vultr_csi_release  - default: "latest" (If specifying a version use the form `vX.Y.Z`)
