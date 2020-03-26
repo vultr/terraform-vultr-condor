@@ -25,10 +25,6 @@ resource "vultr_server" "controllers" {
   }
 }
 
-data "http" "vultr_ccm" {
-  url = 
-}
-
 resource "null_resource" "cluster_init" {
   depends_on = [vultr_server.controllers[0]]
 
