@@ -1,4 +1,9 @@
-variable "vultr_ccm_image_release" {
+variable "vultr_ccm_release" {
+  type    = string
+  default = "latest"
+}
+
+variable "vultr_csi_release" {
   type    = string
   default = "latest"
 }
