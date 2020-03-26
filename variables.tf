@@ -3,7 +3,7 @@ variable "vultr_ccm_image" {
   default = "vultr/vultr-cloud-controller-manager:v0.0.2"
 }
 
-variable "ccm_api_key" {
+variable "cluster_api_key" {
   type = string
 }
 

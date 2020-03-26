@@ -42,7 +42,13 @@ resource "null_resource" "cluster_init" {
       "mkdir -p $HOME/.kube", 
       "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config",
       "sudo chown $(id -u):$(id -g) $HOME/.kube/config",
+      "mkdir ~/vultr",
     ]
+  }
+
+  provisioner "file" {
+    content    = templatefile("${path.module}/templates/vultr/api-key.yml.tpl", { CLUSTER_API_KEY = var.cluster_api_key, CLUSTER_REGION = data.vultr_region.cluster_region.id }) 
+    dstination = "~/vultr/api-key.yml"
   }
 }
 
