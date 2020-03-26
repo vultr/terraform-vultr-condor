@@ -53,7 +53,7 @@ resource "null_resource" "worker_join" {
   }
 
   provisioner "local-exec" {
-    command = "scp root@${vultr_server.controllers[0].main_ip}:~/join/worker-${count.index}-join ${path.module}/scripts/worker/local/worker-${count.index}-join"
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[0].main_ip}:~/join/worker-${count.index}-join ${path.module}/scripts/worker/local/worker-${count.index}-join"
   }
 
   provisioner "remote-exec" {
