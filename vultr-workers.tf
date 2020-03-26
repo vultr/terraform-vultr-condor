@@ -53,7 +53,7 @@ resource "null_resource" "worker_join" {
   }
 
   provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[0].main_ip}:~/join/worker-${count.index}-join ${path.module}/scripts/worker/local/worker-${count.index}-join"
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[0].main_ip}:~/join/worker-${count.index}-join ${path.module}/scripts/worker/remotee/worker-${count.index}-join"
   }
 
   provisioner "remote-exec" {
@@ -64,7 +64,7 @@ resource "null_resource" "worker_join" {
       password = vultr_server.workers[count.index].default_password
     }
 
-    inline = [ file("${path.module}/scripts/worker/local/worker-${count.index}-join") ]
+    inline = [ file("${path.module}/scripts/worker/remote/worker-${count.index}-join") ]
   }
 
   provisioner "remote-exec" {
@@ -75,7 +75,7 @@ resource "null_resource" "worker_join" {
   }
 
   provisioner "local-exec" {
-    command = "rm -f ${path.module}/scripts/worker/local/worker-${count.index}-join"
+    command = "rm -f ${path.module}/scripts/worker/remote/worker-${count.index}-join"
   }
 }
 
