@@ -2,7 +2,7 @@
 
 set -euxo posix
 
-if [ "$#" -ne 2 ]; then
+if [ $# -ne 2 ]; then
 	echo "common-provisioner.sh requires 2 parameters"
 	exit 1
 fi
