@@ -1,6 +1,6 @@
-variable "vultr_ccm_image" {
+variable "vultr_ccm_image_release" {
   type    = string
-  default = "vultr/vultr-cloud-controller-manager:v0.0.2"
+  default = "v0.0.2"
 }
 
 variable "cluster_api_key" {

@@ -25,6 +25,10 @@ resource "vultr_server" "controllers" {
   }
 }
 
+data "http" "vultr_ccm" {
+  url = 
+}
+
 resource "null_resource" "cluster_init" {
   depends_on = [vultr_server.controllers[0]]
 
@@ -47,8 +51,20 @@ resource "null_resource" "cluster_init" {
   }
 
   provisioner "file" {
-    content    = templatefile("${path.module}/templates/vultr/api-key.yml.tpl", { CLUSTER_API_KEY = var.cluster_api_key, CLUSTER_REGION = data.vultr_region.cluster_region.id }) 
+    content     = templatefile("${path.module}/templates/vultr/api-key.yml.tpl", { CLUSTER_API_KEY = var.cluster_api_key, CLUSTER_REGION = data.vultr_region.cluster_region.id }) 
     destination = "~/vultr/api-key.yml"
+  }
+
+  provisioner "file" {
+    content     = data.http.vultr_ccm_file.body
+    destination = "~/vultr/vultr-ccm.yml" 
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "kubectl apply -f ~/vultr/api-key.yml",
+      "kubectl apply -f ~/vultr/vultr-ccm.yml",
+    ]
   }
 }
 
