@@ -21,7 +21,7 @@ resource "vultr_server" "controllers" {
   }
 
   provisioner "remote-exec" {
-    inline = [ "set -euxo", "chmod +x /tmp/common-provisioner.sh", "/tmp/common-provisioner.sh ${var.docker_release} ${var.containerd_release}" ]
+    inline = [ "set -euxo", "chmod +x /tmp/common-provisioner.sh", "/tmp/common-provisioner.sh ${var.docker_release} ${var.containerd_release} ${var.k8_release}" ]
   }
 }
 

@@ -2,7 +2,7 @@
 
 set -euxo posix
 
-if [ $# -ne 2 ]; then
+if [ $# -ne 3 ]; then
 	echo "common-provisioner.sh requires 2 parameters"
 	exit 1
 fi
@@ -14,6 +14,7 @@ INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
 DOCKER_RELEASE="$1"
 CONTAINERD_RELEASE="$2"
+K8_RELEASE=$(echo $3 | sed 's/v//' | sed 's/$/-00/')
 
 pre_dependencies(){
 	apt -y install gnupg2 iptables arptables ebtables
@@ -60,7 +61,7 @@ install_k8(){
 		EOF
 
 	apt -y update
-	apt -y install kubelet kubeadm kubectl
+	apt -y install kubelet=$K8_RELEASE kubeadm=$K8_RELEASE kubectl=$K8_RELEASE
 	apt-mark hold kubelet kubeadm kubectl
 
 	cat <<-EOF > /etc/default/kubelet
