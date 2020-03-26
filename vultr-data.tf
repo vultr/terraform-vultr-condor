@@ -22,7 +22,7 @@ data "vultr_region" "cluster_region" {
 data "vultr_os" "cluster_os" {
   filter {
     name   = "name"
-    values = [var.cluster_os]
+1    values = [var.cluster_os]
   }
 }
 
@@ -31,5 +31,5 @@ data "http" "vultr_ccm_file" {
 }
 
 data "http" "vultr_csi_file" {
-  url = "https://github.com/vultr/vultr-csi/blob/ef0c9f591b8c0e72d5f7356c1c2fb4bf1e4c5577/docs/releases/${var.vultr_csi_release}.yml"
+  url = "https://raw.githubusercontent.com/vultr/vultr-csi/master/docs/releases/${var.vultr_csi_release}.yml"
 }
