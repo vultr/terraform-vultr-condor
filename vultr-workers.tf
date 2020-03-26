@@ -29,7 +29,7 @@ resource "vultr_server" "workers" {
   }
 }
 
-resource "null_resource" "get_join_command" {
+resource "null_resource" "worker_join" {
   depends_on = [null_resource.cluster_init]
 
   count = length(vultr_server.workers.*.id)
@@ -47,7 +47,7 @@ resource "null_resource" "get_join_command" {
 
   provisioner "remote-exec" {
     inline = [
-      "mkdir ~/join",
+      "if test -d ~/join; then echo \"creating token\"; else mkdir ~/join; fi",
       "kubeadm token create --print-join-command > ~/join/worker-${count.index}-join",
     ]
   }
@@ -55,40 +55,27 @@ resource "null_resource" "get_join_command" {
   provisioner "local-exec" {
     command = "scp root@${vultr_server.controllers[0].main_ip}:~/join/worker-${count.index}-join ${path.module}/scripts/worker/local/worker-${count.index}-join"
   }
-}
-
-resource "null_resource" "worker_join" {
-  depends_on = [null_resource.get_join_command]
-
-  count = length(vultr_server.workers.*.id)
-
-  triggers = {
-    worker_id = vultr_server.workers[count.index].id
-  }
-
-  connection {
-    type     = "ssh"
-    host     = vultr_server.workers[count.index].main_ip
-    user     = "root"
-    password = vultr_server.workers[count.index].default_password
-  }
 
   provisioner "remote-exec" {
+    connection {
+      type     = "ssh"
+      host     = vultr_server.workers[count.index].main_ip
+      user     = "root"
+      password = vultr_server.workers[count.index].default_password
+    }
+
     inline = [ file("${path.module}/scripts/worker/local/worker-${count.index}-join") ]
   }
 
   provisioner "remote-exec" {
-
-    connection {
-      type     = "ssh"
-      host     = vultr_server.controllers[0].main_ip
-      user     = "root"
-      password = vultr_server.controllers[0].default_password
-    }
-
     inline = [
       "kubeadm token delete $(cat join/worker-${count.index}-join | awk '{print $5}')",
       "rm -f ~/join/worker-${count.index}-join",      
     ]
   }
+
+  provisioner "local-exec" {
+    command = "rm -f ${path.module}/scripts/worker/local/worker-${count.index}-join"
+  }
 }
+
