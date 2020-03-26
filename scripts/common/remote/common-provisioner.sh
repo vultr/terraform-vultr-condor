@@ -16,7 +16,7 @@ DOCKER_RELEASE="$1"
 CONTAINERD_RELEASE="$2"
 
 pre_dependencies(){
-	apt -y install gnupg2 iptables arptables ebtables
+	apt -y install gnupg2 iptables arptables ebtables apt-transport-https
 
 	cat <<-EOF > /etc/sysctl.d/k8s.conf
 		net.bridge.bridge-nf-call-ip6tables = 1
@@ -40,7 +40,7 @@ network_config(){
 		DHCP=yes
 		EOF
 
-	cat <<-EOF > /etc/systemd/network/ens3.network
+	cat <<-EOF > /etc/systemd/network/ens7.network
 		[Match]
 		Name=ens7
 
@@ -55,7 +55,7 @@ network_config(){
 install_k8(){
 	curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
 
-	cat <<-EOF /etc/apt/sources.list.d/kubernetes.list
+	cat <<-EOF > /etc/apt/sources.list.d/kubernetes.list
 		deb https://apt.kubernetes.io/ kubernetes-xenial main
 		EOF
 
@@ -63,7 +63,7 @@ install_k8(){
 	apt -y install kubelet kubeadm kubectl
 	apt-mark hold kubelet kubeadm kubectl
 
-	cat <<-EOF /etc/default/kubelet
+	cat <<-EOF > /etc/default/kubelet
 		KUBELET_EXTRA_ARGS="--cloud-provider=external"
 		EOF
 }
@@ -74,14 +74,14 @@ install_docker(){
 
 	curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
 
-	cat <<-EOF /etc/apt/sources.list.d/docker.list
+	cat <<-EOF > /etc/apt/sources.list.d/docker.list
 		deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable
 		EOF
 
 	apt -y update
 	apt -y install containerd.io=$CONTAINERD_RELEASE docker-ce=$DOCKER_RELEASE docker-ce-cli=$DOCKER_RELEASE
 
-	cat > /etc/docker/daemon.json <<-EOF
+	cat <<-EOF > /etc/docker/daemon.json
 		{
 		  "exec-opts": ["native.cgroupdriver=systemd"],
 		  "log-driver": "json-file",
