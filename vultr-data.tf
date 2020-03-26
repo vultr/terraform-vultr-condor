@@ -27,5 +27,5 @@ data "vultr_os" "cluster_os" {
 }
 
 data "http" "vultr_ccm_file" {
-  url = "https://raw.githubusercontent.com/vultr/vultr-cloud-controller-manager/master/docs/releases/${var.vultr_ccm_image_release}"
+  url = "https://raw.githubusercontent.com/vultr/vultr-cloud-controller-manager/master/docs/releases/${var.vultr_ccm_image_release}.yml"
 }
