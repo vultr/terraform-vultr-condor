@@ -32,11 +32,13 @@ variable "worker_count" {
 }
 
 variable "controller_plan" {
-  type = string
+  type    = string
+  default = "8192 MB RAM,160 GB SSD,4.00 TB BW"
 }
 
 variable "worker_plan" {
-  type = string
+  type    = string
+  default = "4096 MB RAM,80 GB SSD,3.00 TB BW"
 }
 
 variable "cluster_region" {
