@@ -15,11 +15,17 @@ resource "vultr_server" "workers" {
     private_key    = file("~/.ssh/id_rsa")
   }
 
+  provisioner "file" {
+    source      = "${path.module}/scripts/common/remote/"
+    destination = "/tmp"
+  }
+
   provisioner "remote-exec" {
-    script = "${path.module}/scripts/common/remote/common-provisioner.sh"
+    inline = [ "chmod +x /tmp/common-provisioner.sh", "/tmp/common-provisioner.sh ${var.DOCKER_RELEASE} ${var.CONTAINERD_RELEASE}" ]
   }
 }
 
+/*
 resource "null_resource" "worker_join" {
   depends_on = [null_resource.cluster_cluster_init]
 
@@ -40,4 +46,4 @@ resource "null_resource" "worker_join" {
     script = "${path.module}/scripts/worker/remote/worker-join.sh"
   }
 }
-
+*/

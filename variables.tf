@@ -1,5 +1,6 @@
 variable "vultr_ccm_image" {
-  type = string
+  type    = string
+  default = "vultr/vultr-cloud-controller-manager:v0.0.2"
 }
 
 variable "ccm_api_key" {
@@ -11,11 +12,13 @@ variable "cluster_name" {
 }
 
 variable "controller_count" {
-  type = number
+  type    = number
+  default = 1
 }
 
 variable "worker_count" {
-  type = number
+  type    = number
+  default = 3
 }
 
 variable "controller_plan" {
@@ -27,21 +30,31 @@ variable "worker_plan" {
 }
 
 variable "cluster_region" {
-  type = string
+  type    = string
+  default = "New Jersey"
 }
 
 variable "cluster_os" {
-  type = string
+  type    = string
+  default = "Debian 10 x64 (buster)"
 }
 
 variable "k8_release" {
-  type = string
+  type    = string
+  default = "v1.17.4"
 }
 
 variable "docker_release" {
-  type = string
+  type    = string
+  default = "5:19.03.4~3-0~debian-$(lsb_release -cs)"
+}
+
+variable "containerd_release" {
+  type    = string
+  default = "1.2.10-3"
 }
 
 variable "pod_network_cidr" {
-  type = string
+  type    = string
+  default = "10.244.0.0/16" 
 }

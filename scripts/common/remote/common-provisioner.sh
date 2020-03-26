@@ -4,8 +4,8 @@ set -euxo
 
 INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
-CONTAINERD_RELEASE="1.2.10-3"
-DOCKER_RELEASE="5:19.03.4~3-0~debian-$(lsb_release -cs)"
+DOCKER_RELEASE="$1"
+CONTAINERD_RELEASE="$2"
 
 pre_dependencies(){
 	cat <<-EOF > /etc/sysctl.d/k8s.conf
@@ -94,11 +94,21 @@ install_docker(){
 	systemctl restart docker
 }
 
+clean(){
+	rm -f $(pwd)/common-provisioner.sh
+}
+
 main(){
+	if [ "$#" -ne 2 ]; then
+		echo "common-provisioner.sh requires 2 parameters"
+		exit 1
+	fi
+
 	pre_dependencies
 	network_config
 	install_k8
 	install_docker
+	clean
 }
 
 main

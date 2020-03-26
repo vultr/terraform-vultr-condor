@@ -1,5 +1,5 @@
 resource "vultr_server" "controllers" {
-  count			 = var.controller_count # HA Not currently supported
+  count			 = var.controller_count 
   plan_id		 = data.vultr_plan.controller_plan.id
   region_id		 = data.vultr_region.cluster_region.id
   os_id			 = data.vultr_os.cluster_os.id
@@ -15,11 +15,17 @@ resource "vultr_server" "controllers" {
     private_key    = file("~/.ssh/id_rsa")
   }
 
+  provisioner "file" {
+    source      = "${path.module}/scripts/common/remote/"
+    destination = "/tmp"
+  }
+
   provisioner "remote-exec" {
-    script = "${path.module}/scripts/common/remote/common-provisioner.sh"
+    inline = [ "chmod +x /tmp/common-provisioner.sh", "/tmp/common-provisioner.sh ${var.docker_release} ${var.containerd_release}" ]
   }
 }
 
+/*
 resource "null_resource" "cluster_init" {
   depends_on = [vultr_server.controllers]
 
@@ -30,27 +36,16 @@ resource "null_resource" "cluster_init" {
     password = vultr_server.controllers[0].default_password
   }
 
+  provisioner "file" {
+    source      = "${path.module}/scripts/controller/remote/"
+    destination = "/tmp/scripts/"
+  }
+
   provisioner "remote-exec" {
     script = "${path.module}/scripts/controller/remote/cluster-init.sh"
   }
 }
-
-resource "null_resource" "controller_join" {
-  depends_on = [null_resource.cluster_init]
-
-  count = var.controller_count > 1 ? var.controller_count-1 : 0
-
-  connection {
-    type     = "ssh"
-    host     = vultr_server.controllers[count.index+1].main_ip
-    user     = "root"
-    password = vultr_server.controllers[count.index+1].default_password
-  }
-
-  provisioner "remote-exec" {
-    script = "${path.module}/scripts/controller/remote/ha-controller-join.sh"
-  }
-}
+*/
 
 
 
