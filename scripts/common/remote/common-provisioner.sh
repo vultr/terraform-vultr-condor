@@ -1,6 +1,9 @@
 #!/bin/bash
 
-set -euxo
+set -euxo posix
+
+apt -y update
+apt -y install jq
 
 INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
@@ -8,17 +11,14 @@ DOCKER_RELEASE="$1"
 CONTAINERD_RELEASE="$2"
 
 pre_dependencies(){
+	apt -y install gnupg2 iptables arptables ebtables
+
 	cat <<-EOF > /etc/sysctl.d/k8s.conf
 		net.bridge.bridge-nf-call-ip6tables = 1
 		net.bridge.bridge-nf-call-iptables = 1
 		EOF
 
 	sysctl --system
-
-	apt -y update
-	apt -y upgrade
-
-	apt -y install jq gnupg2 iptables arptables ebtables
 
 	update-alternatives --set iptables /usr/sbin/iptables-legacy
 	update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
@@ -105,6 +105,7 @@ main(){
 	fi
 
 	pre_dependencies
+
 	network_config
 	install_k8
 	install_docker
