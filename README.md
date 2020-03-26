@@ -1,3 +1,8 @@
+## PRE-RELEASE NOTES
+* Uncomment `vultr-csi.yml` source in `vultr-data.tf`
+* Change `vultr-csi.yml` file source in `vultr-controllers.tf` to content from data source
+* Remove `files/vultr-csi-latest.yml`
+
 #### Usage:
 1. Export your Vultr API Keys as an environment variable:
 ```
