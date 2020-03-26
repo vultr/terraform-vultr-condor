@@ -21,7 +21,7 @@ resource "vultr_server" "workers" {
   }
 
   provisioner "remote-exec" {
-    inline = [ "chmod +x /tmp/common-provisioner.sh", "/tmp/common-provisioner.sh ${var.DOCKER_RELEASE} ${var.CONTAINERD_RELEASE}" ]
+    inline = [ "chmod +x /tmp/common-provisioner.sh", "/tmp/common-provisioner.sh ${var.docker_release} ${var.containerd_release}" ]
   }
 }
 
