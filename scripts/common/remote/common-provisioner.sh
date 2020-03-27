@@ -24,6 +24,9 @@ pre_dependencies(){
 		EOF
 
 	sysctl --system
+
+	systemctl disable firewalld
+	systemctl stop firewalld
 }
 
 network_config(){
