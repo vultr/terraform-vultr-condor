@@ -3,12 +3,12 @@
 set -euxo posix
 
 if [ $# -ne 3 ]; then
-	echo "common-provisioner.sh requires 2 parameters"
+	echo "common-provisioner.sh requires 3 parameters"
 	exit 1
 fi
 
-apt -y update
-apt -y install jq
+yum -y update
+yum -y install jq curl
 
 INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
@@ -17,33 +17,32 @@ CONTAINERD_RELEASE="$2"
 K8_RELEASE=$(echo $3 | sed 's/v//' | sed 's/$/-00/')
 
 pre_dependencies(){
-	apt -y install gnupg2 iptables arptables ebtables
-
 	cat <<-EOF > /etc/sysctl.d/k8s.conf
 		net.bridge.bridge-nf-call-ip6tables = 1
 		net.bridge.bridge-nf-call-iptables = 1
 		EOF
 
 	sysctl --system
-
-	update-alternatives --set iptables /usr/sbin/iptables-legacy
-	update-alternatives --set ip6tables /usr/sbin/ip6tables-legacy
-	update-alternatives --set arptables /usr/sbin/arptables-legacy
-	update-alternatives --set ebtables /usr/sbin/ebtables-legacy
 }
 
 network_config(){
-	cat <<-EOF > /etc/systemd/network/ens3.network
+	yum -y install systemd-networkd systemd-resolved
+	systemctl disable network NetworkManager
+	rm -f /etc/resolv.conf
+	ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
+	mkdir /etc/systemd/network
+
+	cat <<-EOF > /etc/systemd/network/eth0.network
 		[Match]
-		Name=ens3
+		Name=eth0
 
 		[Network]
 		DHCP=yes
 		EOF
 
-	cat <<-EOF > /etc/systemd/network/ens7.network
+	cat <<-EOF > /etc/systemd/network/eth1.network
 		[Match]
-		Name=ens7
+		Name=eth1
 
 		[Network]
 		Address=$PRIVATE_IP
@@ -114,3 +113,4 @@ main(){
 }
 
 main
+
