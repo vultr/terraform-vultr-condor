@@ -8,13 +8,14 @@ if [ $# -ne 3 ]; then
 fi
 
 yum -y update
+yum -y install epel-release
 yum -y install jq curl
 
 INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
 DOCKER_RELEASE="$1"
 CONTAINERD_RELEASE="$2"
-K8_RELEASE=$(echo $3 | sed 's/v//' | sed 's/$/-00/')
+K8_RELEASE=$(echo $3 | sed 's/v//')
 
 pre_dependencies(){
 	cat <<-EOF > /etc/sysctl.d/k8s.conf
@@ -81,7 +82,7 @@ install_docker(){
 	yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 	yum -y install containerd.io-$CONTAINERD_RELEASE docker-ce-$DOCKER_RELEASE docker-ce-$DOCKER_RELEASE
 
-	if test -d /etc/docker; echo "continuing"; else mkdir /etc/docker; fi
+	if test -d /etc/docker; then echo "continuing"; else mkdir /etc/docker; fi
 
 	cat <<-EOF > /etc/docker/daemon.json
 		{
