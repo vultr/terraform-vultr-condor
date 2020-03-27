@@ -2,8 +2,10 @@
 
 set -euxo posix
 
-if [ $# -ne 3 ]; then
-	echo "common-provisioner.sh requires 2 parameters"
+$PARAM_COUNT=3
+
+if [ $# -ne $PARAM_COUNT ]; then
+	echo "common-provisioner.sh requires $PARAM_COUNT parameters"
 	exit 1
 fi
 
@@ -12,6 +14,8 @@ apt -y install jq
 
 INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
+
+# Parameters
 DOCKER_RELEASE="$1"
 CONTAINERD_RELEASE="$2"
 K8_RELEASE=$(echo $3 | sed 's/v//' | sed 's/$/-00/')
