@@ -68,13 +68,13 @@ install_k8(){
 		KUBELET_EXTRA_ARGS="--cloud-provider=external"
 		EOF
 
-	setenforce 0
+	# setenforce 0
 	sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
 
 	yum install -y kubelet-$K8_RELEASE kubeadm-$K8_RELEASE kubectl-$K8_RELEASE --disableexcludes=kubernetes
 
 	systemctl daemon-reload
-	systemctl enable --now kubelet
+	systemctl enable kubelet
 }
 
 install_docker(){
