@@ -53,33 +53,35 @@ network_config(){
 }
 
 install_k8(){
-	curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-
-	cat <<-EOF > /etc/apt/sources.list.d/kubernetes.list
-		deb https://apt.kubernetes.io/ kubernetes-xenial main
+	cat <<-EOF > /etc/yum.repos.d/kubernetes.repo
+		[kubernetes]
+		name=Kubernetes
+		baseurl=https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64
+		enabled=1
+		gpgcheck=1
+		repo_gpgcheck=1
+		gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 		EOF
 
-	apt -y update
-	apt -y install kubelet=$K8_RELEASE kubeadm=$K8_RELEASE kubectl=$K8_RELEASE
-	apt-mark hold kubelet kubeadm kubectl
-
-	cat <<-EOF > /etc/default/kubelet
+	cat <<-EOF > /etc/sysconfig/kubelet
 		KUBELET_EXTRA_ARGS="--cloud-provider=external"
 		EOF
+
+	setenforce 0
+	sed -i 's/^SELINUX=enforcing$/SELINUX=permissive/' /etc/selinux/config
+
+	yum install -y kubelet-$K8_RELEASE kubeadm-$K8_RELEASE kubectl-$K8_RELEASE --disableexcludes=kubernetes
+
+	systemctl daemon-reload
+	systemctl enable --now kubelet
 }
 
 install_docker(){
-	apt -y update
-	apt -y install apt-transport-https ca-certificates curl gnupg2 software-properties-common
+	yum install -y yum-utils device-mapper-persistent-data
+	yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+	yum -y install containerd.io-$CONTAINERD_RELEASE docker-ce-$DOCKER_RELEASE docker-ce-$DOCKER_RELEASE
 
-	curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add -
-
-	cat <<-EOF > /etc/apt/sources.list.d/docker.list
-		deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable
-		EOF
-
-	apt -y update
-	apt -y install containerd.io=$CONTAINERD_RELEASE docker-ce=$DOCKER_RELEASE docker-ce-cli=$DOCKER_RELEASE
+	if test -d /etc/docker; echo "continuing"; else mkdir /etc/docker; fi
 
 	cat <<-EOF > /etc/docker/daemon.json
 		{
@@ -107,8 +109,8 @@ main(){
 	pre_dependencies
 
 	network_config
-	install_k8
 	install_docker
+	install_k8
 	clean
 }
 

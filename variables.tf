@@ -58,12 +58,12 @@ variable "k8_release" {
 
 variable "docker_release" {
   type    = string
-  default = "5:19.03.4~3-0~debian-$(lsb_release -cs)"
+  default = "19.03.4"
 }
 
 variable "containerd_release" {
   type    = string
-  default = "1.2.10-3"
+  default = "1.2.10"
 }
 
 variable "pod_network_cidr" {
