@@ -2,7 +2,7 @@
 
 set -euxo posix
 
-$PARAM_COUNT=3
+PARAM_COUNT=3
 
 if [ $# -ne $PARAM_COUNT ]; then
 	echo "common-provisioner.sh requires $PARAM_COUNT parameters"
