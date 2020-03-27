@@ -48,7 +48,7 @@ variable "cluster_region" {
 
 variable "cluster_os" {
   type    = string
-  default = "Debian 10 x64 (buster)"
+  default = "CentOS 7 x64"
 }
 
 variable "k8_release" {
