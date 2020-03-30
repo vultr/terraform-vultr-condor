@@ -14,6 +14,8 @@ apt -y install jq
 
 INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
+PUBLIC_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | select(.["network-type"]=="public") | .mac')
+PRIVATE_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | select(.["network-type"]=="private") | .mac')
 
 # Parameters
 DOCKER_RELEASE="$1"
@@ -37,17 +39,17 @@ pre_dependencies(){
 }
 
 network_config(){
-	cat <<-EOF > /etc/systemd/network/ens3.network
+	cat <<-EOF > /etc/systemd/network/public.network
 		[Match]
-		Name=ens3
+		MACAddress=$PUBLIC_MAC
 
 		[Network]
 		DHCP=yes
 		EOF
 
-	cat <<-EOF > /etc/systemd/network/ens7.network
+	cat <<-EOF > /etc/systemd/network/private.network
 		[Match]
-		Name=ens7
+		MACAddress=$PRIVATE_MAC
 
 		[Network]
 		Address=$PRIVATE_IP
