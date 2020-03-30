@@ -13,6 +13,10 @@ yum -y install jq curl
 
 INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
+PUBLIC_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | select(.["network-type"]=="public") | .mac')
+PRIVATE_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | select(.["network-type"]=="private") | .mac')
+
+# Parameters
 DOCKER_RELEASE="$1"
 CONTAINERD_RELEASE="$2"
 K8_RELEASE=$(echo $3 | sed 's/v//')
@@ -36,17 +40,17 @@ network_config(){
 	ln -s /run/systemd/resolve/resolv.conf /etc/resolv.conf
 	mkdir /etc/systemd/network
 
-	cat <<-EOF > /etc/systemd/network/eth0.network
+	cat <<-EOF > /etc/systemd/network/public.network
 		[Match]
-		Name=eth0
+		MACAddress=$PUBLIC_MAC
 
 		[Network]
 		DHCP=yes
 		EOF
 
-	cat <<-EOF > /etc/systemd/network/eth1.network
+	cat <<-EOF > /etc/systemd/network/private.network
 		[Match]
-		Name=eth1
+		MACAddress=$PRIVATE_MAC
 
 		[Network]
 		Address=$PRIVATE_IP
