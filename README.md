@@ -17,7 +17,7 @@ variable "cluster_api_key" {
 }
 
 module "cluster" {
-  source          = "git::https://github.com/vultr/terraform-kubernetes-vultr?ref=centos"
+  source          = "git::https://github.com/vultr/condor?ref=centos"
 
   cluster_api_key          = var.cluster_api_key                       
   cluster_name             = "cluster-name"
