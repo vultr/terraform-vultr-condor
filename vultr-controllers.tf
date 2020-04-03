@@ -66,8 +66,7 @@ resource "null_resource" "cluster_init" {
   }
 
   provisioner "file" {
-#    content     = data.http.vultr_csi_file.body
-    source      = "${path.module}/files/vultr-csi-latest.yml"
+    content     = data.http.vultr_csi_file.body
     destination = "~/vultr/vultr-csi.yml" 
   }
 
