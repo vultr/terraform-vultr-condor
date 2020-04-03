@@ -18,7 +18,7 @@ While Condor defaults many cluster configurations you are also able to adjust an
 1. Export your Vultr API Keys as an environment variable:
 ```
 $ export VULTR_API_KEY=EXAMPLEAPIKEYABCXYZ
-$ export TF_VAR_cluster_api_key=ANOTHEREXAMPLEAPIKEYABCXYZ # You can re-use your Terraform API key, however I prefer a separate Kubernetes sub-user API Key.
+$ export TF_VAR_cluster_api_key=ANOTHEREXAMPLEAPIKEYABCXYZ # You can re-use your Terraform API key, however it is recommened to use a separate Kubernetes sub-user API Key.
 ```
 2. Create `main.tf` file and `cluster_api_key` variable with the following(adjust parameters as necessary). 
 ```hcl
