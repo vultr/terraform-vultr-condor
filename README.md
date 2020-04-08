@@ -1,16 +1,27 @@
-## PRE-RELEASE NOTES
-* Uncomment `vultr-csi.yml` source in `vultr-data.tf`
-* Change `vultr-csi.yml` file source in `vultr-controllers.tf` to content from data source
-* Remove `files/vultr-csi-latest.yml`
+# Condor
+
+Condor is easiest and fastest way to deploy a Kubernetes cluster on Vultr. 
+
+Some notable configurations are 
+
+- Installs the [Vultr CCM](https://github.com/vultr/vultr-cloud-controller-manager)
+- Installs the [Vultr CSI](https://github.com/vultr/vultr-csi)
+- Installs Flannel CNI
+- Configures private networking
+- Define how many worker nodes you would like
+- Configure Kuberbetes, Docker, and ContainerD release versions
+
+While Condor defaults many cluster configurations you are also able to adjust and fine tune the cluster to your specific needs.
+
 
 #### Usage:
 1. Export your Vultr API Keys as an environment variable:
 ```
 $ export VULTR_API_KEY=EXAMPLEAPIKEYABCXYZ
-$ export TF_VAR_cluster_api_key=ANOTHEREXAMPLEAPIKEYABCXYZ # You can re-use your Terraform API key, however I prefer a separate Kubernetes sub-user API Key.
+$ export TF_VAR_cluster_api_key=ANOTHEREXAMPLEAPIKEYABCXYZ # You can re-use your Terraform API key, however it is recommened to use a separate Kubernetes sub-user API Key.
 ```
 2. Create `main.tf` file and `cluster_api_key` variable with the following(adjust parameters as necessary). 
-```
+```hcl
 # main.tf
 variable "cluster_api_key" {
   type = string
@@ -24,14 +35,14 @@ module "cluster" {
 }
 ```
 3. Deploy the cluster
-```
+```sh
 $ terraform init
 $ terraform validate
 $ terraform apply
 ```
 
 #### Optional module parameters and defaults:
-```
+```sh
 vultr_ccm_release  - default: "latest" (If specifying a version use the form `vX.Y.Z`)
 vultr_csi_release  - default: "latest" (If specifying a version use the form `vX.Y.Z`)
 cluster_cni        - default: "https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
