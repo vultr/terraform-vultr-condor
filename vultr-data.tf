@@ -30,8 +30,7 @@ data "http" "vultr_ccm_file" {
   url = "https://raw.githubusercontent.com/vultr/vultr-cloud-controller-manager/master/docs/releases/${var.vultr_ccm_release}.yml"
 }
 
-/*
 data "http" "vultr_csi_file" {
   url = "https://raw.githubusercontent.com/vultr/vultr-csi/master/docs/releases/${var.vultr_csi_release}.yml"
 }
-*/
+
