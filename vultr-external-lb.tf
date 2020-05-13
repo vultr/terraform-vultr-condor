@@ -9,6 +9,6 @@ resource "vultr_load_balancer" "external_lb" {
     frontend_protocol = "tcp"
     frontend_port = var.external_lb_frontend_port
     backend_protocol = "tcp"
-    backend_port = var.external_lb_frontend_port
+    backend_port = var.external_lb_backend_port
   }
 }
