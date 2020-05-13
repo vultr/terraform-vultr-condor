@@ -85,6 +85,23 @@ resource "null_resource" "cluster_init" {
 
 resource "null_resource" "cluster_init_ha" {
   count = var.controller_count > 1 ? 1 : 0
+
+  depends_on = [vultr_server.controllers[0]]
+
+  connection {
+    type     = "ssh"
+    host     = vultr_server.controllers[0].main_ip
+    user     = "root"
+    password = vultr_server.controllers[0].default_password
+  }
+
+  provisioner "remote-exec" {
+    inline = [ 
+      "set -euxo", 
+      "kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr}", 
+      "mkdir ~/vultr",
+    ]
+  }  
 }
 
 
