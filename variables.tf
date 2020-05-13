@@ -80,3 +80,18 @@ variable "external_lb_backend_port" {
   type = number
   default = 6443
 }
+
+variable "cluster_domain" {
+  type = string
+  default = null
+}
+
+variable "manage_ssl" {
+  type = boolean
+  default = false
+}
+
+variable "kube_api_dns_subdomain" {
+  type = string
+  default = "kubeapi"
+}
