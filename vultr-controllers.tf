@@ -26,6 +26,8 @@ resource "vultr_server" "controllers" {
 }
 
 resource "null_resource" "cluster_init" {
+  count = var.controller_count > 1 ? 0 : 1
+
   depends_on = [vultr_server.controllers[0]]
 
   connection {
@@ -81,6 +83,9 @@ resource "null_resource" "cluster_init" {
   }
 }
 
+resource "null_resource" "cluster_init_ha" {
+  count = var.controller_count > 1 ? 1 : 0
+}
 
 
 

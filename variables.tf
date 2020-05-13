@@ -70,3 +70,13 @@ variable "pod_network_cidr" {
   type    = string
   default = "10.244.0.0/16" 
 }
+
+variable "external_lb_frontend_port" {
+  type = number
+  default = 443
+}
+
+variable "external_lb_backend_port" {
+  type = number
+  default = 6443
+}
