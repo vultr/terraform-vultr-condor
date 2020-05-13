@@ -87,7 +87,7 @@ variable "cluster_domain" {
 }
 
 variable "manage_ssl" {
-  type = boolean
+  type = bool
   default = false
 }
 

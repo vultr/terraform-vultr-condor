@@ -7,7 +7,7 @@ resource "vultr_load_balancer" "external_lb" {
   
   forwarding_rules {
     frontend_protocol = "tcp"
-    frontend__port = var.external_lb_frontend_port
+    frontend_port = var.external_lb_frontend_port
     backend_protocol = "tcp"
     backend_port = var.external_lb_frontend_port
   }
