@@ -97,9 +97,9 @@ resource "null_resource" "cluster_init_ha" {
 
   provisioner "remote-exec" {
     inline = [ 
-      "set -euxo", 
-#      "kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr} 2>&1 | tee /tmp/cluster_init.log", 
-      "kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr}",
+      "set -euxo pipefail", 
+      "stdbuf -o 0 kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr} 2>&1 | tee /tmp/cluster_init.log", 
+#      "kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr}",
       "mkdir -p $HOME/.kube", 
       "sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config",
       "sudo chown $(id -u):$(id -g) $HOME/.kube/config",
