@@ -98,8 +98,9 @@ resource "null_resource" "cluster_init_ha" {
   provisioner "remote-exec" {
     inline = [ 
       "set -euxo", 
-      "kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr} 2>&1 | tee /tmp/cluster_init.log", 
-      "cat /tmp/cluster_init.log | tr -d '\n' | tr -d '\\' | grep -Po \"kubeadm join ${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --token [a-zA-Z0-9]{6}.[a-zA-Z0-9]{16}      --discovery-token-ca-cert-hash sha256:[a-zA-Z0-9]{64}      --control-plane --certificate-key [a-zA-Z0-9]{64}\" > /tmp/controller-join-command",
+#      "kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr} 2>&1 | tee /tmp/cluster_init.log", 
+      "kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr}",
+#      "cat /tmp/cluster_init.log | tr -d '\n' | tr -d '\\' | grep -Po \"kubeadm join ${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --token [a-zA-Z0-9]{6}.[a-zA-Z0-9]{16}      --discovery-token-ca-cert-hash sha256:[a-zA-Z0-9]{64}      --control-plane --certificate-key [a-zA-Z0-9]{64}\" > /tmp/controller-join-command",
       "mkdir ~/vultr",
     ]
   }  
@@ -144,7 +145,5 @@ resource "null_resource" "ha_controller_join" {
     command = "rm -f ${path.module}/scripts/controller/remote/controller-join"
   }
 }
-
-
 
 
