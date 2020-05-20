@@ -1,2 +1,2 @@
-cluster.env
+*.env
 .terraform

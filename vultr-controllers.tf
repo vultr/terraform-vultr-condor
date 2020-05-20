@@ -98,12 +98,52 @@ resource "null_resource" "cluster_init_ha" {
   provisioner "remote-exec" {
     inline = [ 
       "set -euxo", 
-      "kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr}", 
+      "kubeadm init --control-plane-endpoint=${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --upload-certs --pod-network-cidr=${var.pod_network_cidr} | tee /tmp/cluster_init.log", 
+      "cat /tmp/cluster_init.log | tr -d '\n' | tr -d '\\' | grep -Po \"kubeadm join ${var.kube_api_dns_subdomain}.${var.cluster_domain}:${var.external_lb_frontend_port} --token [a-zA-Z0-9]{6}.[a-zA-Z0-9]{16}      --discovery-token-ca-cert-hash sha256:[a-zA-Z0-9]{64}      --control-plane --certificate-key [a-zA-Z0-9]{64}\" > /tmp/controller-join-command"
       "mkdir ~/vultr",
     ]
   }  
+
+  provisioner "local-exec" {
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[0].main_ip}:/tmp/controller-join-command ${path.module}/scripts/controller/remote/controller-join"
+  }
 }
 
+resource "null_resource" "ha_controller_join" {
+  depends_on = [null_resource.cluster_init_ha, vultr_server.controllers]
+
+  count = var.controller_count > 1 ? length(vultr_server.controllers.*.id) - 1 : 0
+
+  provisioner "remote-exec" {
+
+    connection {
+      type     = "ssh"
+      host     = vultr_server.controllers[count.index + 1].main_ip
+      user     = "root"
+      password = vultr_server.controllers[count.index + 1].default_password
+    }
+
+    inline = [ file("${path.module}/scripts/controller/remote/controller-join") ]
+  }
+
+  connection {
+    type     = "ssh"
+    host     = vultr_server.controllers[0].main_ip
+    user     = "root"
+    password = vultr_server.controllers[0].default_password
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "rm -f /tmp/cluster_init.log",
+      "rm -f /tmp/controller-join-command"
+    ]
+  }
+
+  provisioner "local-exec" {
+    command = "rm -f ${path.module}/scripts/controller/remote/controller-join"
+  }
+}
 
 
 
