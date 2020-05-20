@@ -11,4 +11,13 @@ resource "vultr_load_balancer" "external_lb" {
     backend_protocol = "tcp"
     backend_port = var.external_lb_backend_port
   }
+
+  health_check {
+    port = var.external_lb_backend_port
+    protocol = "tcp"
+    response_timeout = 3
+    unhealthy_threshold = 3 
+    check_interval = 5
+    healthy_threshold = 3
+  }
 }
