@@ -30,7 +30,7 @@ resource "vultr_server" "workers" {
 }
 
 resource "null_resource" "worker_join" {
-  depends_on = [null_resource.cluster_init, vultr_server.workers]
+  depends_on = var.controller_count > 1 ? [null_resource.cluster_init_ha, vultr_server.workers] : [null_resource.cluster_init, vultr_server.workers]
 
   count = length(vultr_server.workers.*.id)
 
