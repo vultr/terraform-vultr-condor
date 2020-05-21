@@ -180,7 +180,7 @@ resource "null_resource" "ha_controller_join" {
   }
 
   provisioner "local-exec" {
-    command = "rm -f ${path.module}/scripts/controller/remote/controller-join"
+    command = "echo '' > ${path.module}/scripts/controller/remote/controller-join"
   }
 }
 
