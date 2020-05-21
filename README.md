@@ -57,6 +57,31 @@ docker_release     - default: "5:19.03.4~3-0~debian-$(lsb_release -cs)"
 containerd_release - default: "1.2.10-3"
 pod_network_cidr   - default: "10.244.0.0/16" (Should change if changing `cluster_cni`) 
 ```
+#### HA Control Plane
 
+**Please note, this is a beta feature.**
 
-                
+It is possible to deploy a highly available control plane using Condor, however in contrast with a single control node deployment a domain *must* be provided via the `cluster_domain` variable and the `controller_count` must be an odd number greater than 1(e.g 3 or 5). 
+
+#### HA Control Plane parameters and defaults:
+```sh
+cluster_domain            - default: null
+kube_api_dns_subdomain    - default: "kubeapi"
+external_lb_frontend_port - default: 443
+external_lb_backend_port  - default: 6443
+```
+A minimal HA Control Plane `main.tf` is as follows:
+```hcl
+variable "cluster_api_key" {
+  type = string
+}
+
+module "cluster" {
+  source = "git::https://github.com/vultr/condor?ref=debian"
+
+  cluster_api_key           = var.cluster_api_key
+  cluster_name              = "ha-control-plane"
+  controller_count          = 3
+  cluster_domain            = "some.domain"
+}
+```
