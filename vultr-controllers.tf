@@ -134,7 +134,8 @@ resource "null_resource" "cluster_init_ha" {
 
   provisioner "remote-exec" {
     inline = [
-      "kubectl apply -f ${var.cluster_cni}",
+     "set -euxo",
+     "kubectl apply -f ${var.cluster_cni}",
       "kubectl apply -f ~/vultr/ccm-api-key.yml",
       "kubectl apply -f ~/vultr/csi-api-key.yml",
       "kubectl apply -f ~/vultr/vultr-ccm.yml",
