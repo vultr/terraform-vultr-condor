@@ -28,7 +28,7 @@ resource "vultr_server" "controllers" {
 resource "null_resource" "cluster_init" {
   count = var.controller_count > 1 ? 0 : 1
 
-  depends_on = [vultr_server.controllers[0]]
+  depends_on = [vultr_server.controllers[0], vultr_load_balancer.external_lb[0]]
 
   connection {
     type     = "ssh"
