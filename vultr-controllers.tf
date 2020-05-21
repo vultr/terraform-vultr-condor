@@ -28,7 +28,7 @@ resource "vultr_server" "controllers" {
 resource "null_resource" "cluster_init" {
   count = var.controller_count > 1 ? 0 : 1
 
-  depends_on = [vultr_server.controllers[0], vultr_load_balancer.external_lb[0]]
+  depends_on = [vultr_server.controllers[0]]
 
   connection {
     type     = "ssh"
@@ -86,7 +86,7 @@ resource "null_resource" "cluster_init" {
 resource "null_resource" "cluster_init_ha" {
   count = var.controller_count > 1 ? 1 : 0
 
-  depends_on = [vultr_server.controllers[0]]
+  depends_on = [vultr_server.controllers[0], vultr_load_balancer.external_lb[0]]
 
   connection {
     type     = "ssh"
@@ -140,7 +140,6 @@ resource "null_resource" "cluster_init_ha" {
       "kubectl apply -f ~/vultr/vultr-csi.yml",
     ]
   }
-
 
   provisioner "local-exec" {
     command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_server.controllers[0].main_ip}:/tmp/controller-join-command ${path.module}/scripts/controller/remote/controller-join"

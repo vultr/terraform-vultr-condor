@@ -30,7 +30,7 @@ resource "vultr_server" "workers" {
 }
 
 resource "null_resource" "worker_join" {
-  depends_on = [null_resource.cluster_init, null_resource.cluster_init_ha, vultr_server.workers]
+  depends_on = [null_resource.cluster_init, null_resource.cluster_init_ha[0], vultr_server.workers]
 
   count = length(vultr_server.workers.*.id)
 
