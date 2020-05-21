@@ -86,11 +86,6 @@ variable "cluster_domain" {
   default = null
 }
 
-variable "manage_ssl" {
-  type = bool
-  default = false
-}
-
 variable "kube_api_dns_subdomain" {
   type = string
   default = "kubeapi"
