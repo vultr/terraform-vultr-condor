@@ -53,17 +53,17 @@ variable "cluster_os" {
 
 variable "k8_release" {
   type    = string
-  default = "v1.17.4"
+  default = "v1.18.8"
 }
 
 variable "docker_release" {
   type    = string
-  default = "5:19.03.4~3-0~debian-$(lsb_release -cs)"
+  default = "5:19.03.11~3-0~debian-$(lsb_release -cs)"
 }
 
 variable "containerd_release" {
   type    = string
-  default = "1.2.10-3"
+  default = "1.2.13-2"
 }
 
 variable "pod_network_cidr" {
