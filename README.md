@@ -28,7 +28,7 @@ variable "cluster_api_key" {
 }
 
 module "cluster" {
-  source          = "git::https://github.com/vultr/condor?ref=debian"
+  source          = "git::https://github.com/vultr/condor.git"
 
   cluster_api_key          = var.cluster_api_key                       
   cluster_name             = "cluster-name"
@@ -52,9 +52,9 @@ controller_plan    - default: "8192 MB RAM,160 GB SSD,4.00 TB BW"
 worker_plan        - default: "4096 MB RAM,80 GB SSD,3.00 TB BW"
 cluster_region     - default: "New Jersey" (Block Storage is currently only available in New Jersey)
 cluster_os         - default: "Debian 10 x64 (buster)" (Should only test new releases of Debian, not other flavors of Linux).
-k8_release         - default: "v1.17.4"
-docker_release     - default: "5:19.03.4~3-0~debian-$(lsb_release -cs)"
-containerd_release - default: "1.2.10-3"
+k8_release         - default: "v1.18.8"
+docker_release     - default: "5:19.03.11~3-0~debian-$(lsb_release -cs)"
+containerd_release - default: "1.2.13-2"
 pod_network_cidr   - default: "10.244.0.0/16" (Should change if changing `cluster_cni`) 
 ```
 
