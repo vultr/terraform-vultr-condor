@@ -13,7 +13,7 @@ variable "cluster_api_key" {
 }
 
 variable "cluster_cni" {
-  type = string
+  type    = string
   default = "https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml"
 }
 
@@ -68,5 +68,5 @@ variable "containerd_release" {
 
 variable "pod_network_cidr" {
   type    = string
-  default = "10.244.0.0/16" 
+  default = "10.244.0.0/16"
 }
