@@ -1,0 +1,158 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: vultr-ccm
+  namespace: kube-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  annotations:
+    rbac.authorization.kubernetes.io/autoupdate: "true"
+  name: system:vultr-ccm
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - events
+    verbs:
+      - create
+      - patch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+    verbs:
+      - '*'
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/status
+    verbs:
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - services
+    verbs:
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - services/status
+    verbs:
+      - list
+      - patch
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - serviceaccounts
+    verbs:
+      - create
+      - get
+  - apiGroups:
+      - ""
+    resources:
+      - persistentvolumes
+    verbs:
+      - get
+      - list
+      - update
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - endpoints
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - coordination.k8s.io
+    resources:
+      - leases
+    verbs:
+      - create
+      - get
+      - list
+      - watch
+      - update
+  - apiGroups:
+      - ""
+    resources:
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: system:vultr-ccm
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: system:vultr-ccm
+subjects:
+  - kind: ServiceAccount
+    name: vultr-ccm
+    namespace: kube-system
+---
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: vultr-ccm
+  labels:
+    app: vultr-ccm
+  namespace: kube-system
+spec:
+  selector:
+    matchLabels:
+      app: vultr-ccm
+  template:
+    metadata:
+      labels:
+        app: vultr-ccm
+    spec:
+      serviceAccountName: vultr-ccm
+      nodeSelector:
+        "node-role.kubernetes.io/master": ""
+      tolerations:
+        - key: "node-role.kubernetes.io/master"
+          effect: NoSchedule
+        - key: "CriticalAddonsOnly"
+          operator: "Exists"
+        - key: "node.cloudprovider.kubernetes.io/uninitialized"
+          value: "true"
+          effect: "NoSchedule"
+        - key: node.kubernetes.io/not-ready
+          operator: Exists
+          effect: NoSchedule
+        - key: node.kubernetes.io/unreachable
+          operator: Exists
+          effect: NoSchedule
+      hostNetwork: true
+      containers:
+        - image: vultr/vultr-cloud-controller-manager:v${ VULTR_CCM_VERSION }
+          name: vultr-cloud-controller-manager
+          command:
+            - "/vultr-cloud-controller-manager"
+            - "--cloud-provider=vultr"
+            - "--allow-untagged-cloud=true"
+            - "--authentication-skip-lookup=true"
+            - "--v=3"
+          env:
+            - name: VULTR_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: vultr-api-key
+                  key: api-key

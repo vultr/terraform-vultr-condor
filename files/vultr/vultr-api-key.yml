@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vultr-api-key
+  namespace: kube-system
+stringData:
+  api-key: "${ CLUSTER_VULTR_API_KEY }"
+  region: "${ CLUSTER_REGION }"
