@@ -23,9 +23,9 @@ output "worker_hostnames" {
   value       = vultr_instance.workers.*.hostname
 }
 
-output "default_firewall_group_id" {
+output "condor_firewall_group_id" {
   description = "Default Condor firewall group."
-  value       = vultr_firewall_group.condor_firewall[0].id
+  value       = vultr_instance.controllers[0].firewall_group_id
 }
 
 output "condor_network_id" {

@@ -1,5 +1,17 @@
 locals {
-  cluster_name = "${var.cluster_name}-${random_id.cluster.hex}"
+  cluster_name        = "${var.cluster_name}-${random_id.cluster.hex}"
+  cluster_public_keys = concat([vultr_ssh_key.cluster_provisioner.id], vultr_ssh_key.extra_public_keys.*.id)
+}
+
+resource "vultr_ssh_key" "cluster_provisioner" {
+  name    = "Provisioner public key for Condor cluster: ${local.cluster_name}"
+  ssh_key = var.provisioner_public_key
+}
+
+resource "vultr_ssh_key" "extra_public_keys" {
+  count   = length(var.extra_public_keys)
+  name    = "Public Key for Condor Cluster: ${local.cluster_name}"
+  ssh_key = var.extra_public_keys[count.index]
 }
 
 data "vultr_os" "cluster_os" {
@@ -39,6 +51,7 @@ resource "vultr_instance" "controllers" {
   activation_email    = var.enable_activation_email
   firewall_group_id   = var.firewall_group_id == "" ? vultr_firewall_group.condor_firewall[0].id : var.firewall_group_id
   private_network_ids = [vultr_private_network.condor_network.id]
+  ssh_key_ids         = local.cluster_public_keys
 
   connection {
     type     = "ssh"
@@ -83,6 +96,7 @@ resource "vultr_instance" "workers" {
   activation_email    = var.enable_activation_email
   firewall_group_id   = var.firewall_group_id == "" ? vultr_firewall_group.condor_firewall[0].id : var.firewall_group_id
   private_network_ids = [vultr_private_network.condor_network.id]
+  ssh_key_ids         = local.cluster_public_keys
 
   connection {
     type     = "ssh"
@@ -104,8 +118,8 @@ resource "vultr_instance" "workers" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/files/containerd"
-    destination = "/etc/containerd"
+    source      = "${path.module}/files/containerd/config.toml"
+    destination = "/etc/containerd/config.toml"
   }
 
   provisioner "remote-exec" {
@@ -129,13 +143,8 @@ resource "null_resource" "cluster_init" {
   }
 
   provisioner "file" {
-    source      = "${path.module}/scripts/condor-init.sh"
+    content     = templatefile("${path.module}/scripts/condor-init.sh", { VULTR_CCM_VERSION = var.vultr_ccm_version, VULTR_CSI_VERSION = var.vultr_csi_version, KUBE_FLANNEL_VERSION = var.kube_flannel_version })
     destination = "/tmp/condor-init.sh"
-  }
-
-  provisioner "file" {
-    content     = templatefile("${path.module}/files/cni/flannel/kube-flannel.yml", { POD_NETWORK_CIDR = var.pod_network_cidr })
-    destination = "/tmp/kube-flannel.yml"
   }
 
   provisioner "file" {
@@ -143,15 +152,69 @@ resource "null_resource" "cluster_init" {
     destination = "/tmp/vultr-api-key.yml"
   }
 
-  provisioner "file" {
-    content     = templatefile("${path.module}/files/vultr/vultr-ccm.yml", { VULTR_CCM_VERSION = var.vultr_ccm_version })
-    destination = "/tmp/vultr-ccm.yml"
-  }
-
   provisioner "remote-exec" {
     inline = [
       "chmod +x /tmp/condor-init.sh",
       "/tmp/condor-init.sh",
     ]
+  }
+}
+
+resource "null_resource" "worker_join" {
+  depends_on = [null_resource.cluster_init, vultr_instance.workers]
+
+  triggers = {
+    worker_id = vultr_instance.workers[count.index].id
+  }
+
+  count = var.worker_count
+
+  provisioner "remote-exec" {
+    connection {
+      type     = "ssh"
+      host     = vultr_instance.controllers[0].main_ip
+      user     = "root"
+      password = vultr_instance.controllers[0].default_password
+    }
+
+    inline = [
+      "kubeadm token create --print-join-command > /tmp/worker-${count.index}-join"
+    ]
+  }
+
+  provisioner "local-exec" {
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -3 root@${vultr_instance.controllers[0].main_ip}:/tmp/worker-${count.index}-join root@${vultr_instance.workers[count.index].main_ip}:/tmp/worker-${count.index}-join"
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      type     = "ssh"
+      host     = vultr_instance.workers[count.index].main_ip
+      user     = "root"
+      password = vultr_instance.workers[count.index].default_password
+    }
+
+    inline = [
+      "bash -euxo pipefail -c \"$(cat /tmp/worker-${count.index}-join)\"",
+      "rm -f /tmp/worker-${count.index}-join"
+    ]
+  }
+
+  provisioner "remote-exec" {
+    connection {
+      type     = "ssh"
+      host     = vultr_instance.controllers[0].main_ip
+      user     = "root"
+      password = vultr_instance.controllers[0].default_password
+    }
+
+    inline = [
+      "kubeadm token delete $(cat /tmp/worker-${count.index}-join | awk '{print $5}')",
+      "rm -f /tmp/worker-${count.index}-join"
+    ]
+  }
+
+  provisioner "local-exec" {
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_instance.controllers[0].main_ip}:/root/.kube/config admin.conf && mkdir -p ~/.kube/condor/${local.cluster_name} && sed 's/${vultr_instance.controllers[0].internal_ip}/${vultr_instance.controllers[0].main_ip}/g' admin.conf > ~/.kube/condor/${local.cluster_name}/config"
   }
 }

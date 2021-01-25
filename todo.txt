@@ -1,1 +1,0 @@
-* If the master node doesn't get podCIDR subnet assigned after adding podSubnet to networking section of kubeadm-init.conf try removing podCIDR frome the kubelet section of kubeadm-init.conf
