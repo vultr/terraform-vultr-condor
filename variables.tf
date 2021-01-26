@@ -113,7 +113,7 @@ variable "vultr_ccm_version" {
 }
 
 variable "vultr_csi_version" {
-  description = "Version of the Vultr Cloud Storage Interface to install in the Cluster."
+  description = "Version of the Vultr Container Storage Interface to install in the Cluster."
   type        = string
   default     = "0.0.4"
 }
