@@ -1,5 +1,4 @@
 # Change Log
-
 ## [v0.1.1](https://github.com/vultr/terraform-vultr-condor/releases/tag/v0.1.1) (2020-12-11)
 ### Fixes
 * Pin Vultr Terraform provider to `v1.5.0` for resource name and resource parameter compatibility
