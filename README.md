@@ -25,14 +25,14 @@ module "condor" {
 }
 ```
 2. Configure the [Required Inputs](https://registry.terraform.io/modules/linode/k8s/linode/latest?tab=inputs#required-inputs):
-  * `provisioner_public_key` -  For example, using Terraform functions: `chomp(file("~/.ssh/id_rsa.pub"))`.
+  * `provisioner_public_key` -  For example, using Terraform functions: `chomp(file("~/.ssh/id_rsa.pub"))`, or as a string. 
   * `cluster_vultr_api_key` - This is a Vultr API Key to be used by the Vultr CCM and CSI Kubernetes Addons and should be different from your Terraform provisioning API Key(however can be re-used for testing). Can be configured as an environment variable in your shell(Recommended) or as a string in your `main.tf`(Only recommended for testing).
 
 3. Configure the [Optional Inputs](https://registry.terraform.io/modules/linode/k8s/linode/latest?tab=inputs#optional-inputs) if you wish to change from the defaults.
 
 4. Deploy
 ``` sh
-terraform apply
+terraform init && terraform apply
 ```
 
 5. Check your cluster:
@@ -47,4 +47,3 @@ NAME                                        STATUS   ROLES                  AGE 
 
 ## Notes
  * If an Existing Firewall Group ID is not provided via the `firewall_group_id` input, an empty Vultr Firewall Group will be created and exposed via the `condor_firewall_group_id` output. You may wish to configure firewall rules in your `main.tf` referencing the `condor_firewall_group_id` output to lock down your cluster as needed. 
-
