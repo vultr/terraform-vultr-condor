@@ -9,9 +9,11 @@ Condor is easiest and fastest way to deploy a Kubernetes cluster on Vultr.
 
 While Condor defaults many cluster configurations you are also able to adjust and fine tune the cluster to your specific needs.
 
-Please refer to the [Terraform Module Registry Docs](https://registry.terraform.io/modules/vultr/condor/vultr/latest) for usage and input details, or see the Usage section below for a quick start.
-
+Please refer to the 
 ## Usage
+
+Usage and input details can be found in the [Terraform Module Registry Docs](https://registry.terraform.io/modules/vultr/condor/vultr/latest), or use the quickstart below.
+
 1. Create a `main.tf` file:
 ``` hcl
 # main.tf
