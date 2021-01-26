@@ -38,7 +38,7 @@ terraform apply
 5. Check your cluster:
 
 ``` sh
-kubectl get no --kubeconfig ~/.kube/condor/<cluster-name>-<cluster-id>/configkubectl --kubeconfig ~/.kube/condor/condor-test-728e1059637c7a78/config get no
+kubectl get no --kubeconfig ~/.kube/condor/<cluster-name>-<cluster-id>/config
 NAME                                        STATUS   ROLES                  AGE   VERSION
 <cluster-name>-<cluster-id>-controller-0   Ready    control-plane,master   16h   v1.20.2
 <cluster-name>-<cluster-id>-worker-0       Ready    <none>                 16h   v1.20.2
