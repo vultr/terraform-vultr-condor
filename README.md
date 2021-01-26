@@ -9,7 +9,7 @@ Condor is easiest and fastest way to deploy a Kubernetes cluster on Vultr.
 
 While Condor defaults many cluster configurations you are also able to adjust and fine tune the cluster to your specific needs.
 
-Please refer to the [Terraform Module Registry Docs](https://registry.terraform.io/modules/vultr/condor/vultr/latest) for usage and required inputs, or see the Usage section below.
+Please refer to the [Terraform Module Registry Docs](https://registry.terraform.io/modules/vultr/condor/vultr/latest) for usage and input details, or see the Usage section below for a quick start.
 
 ## Usage
 1. Create a `main.tf` file:
@@ -23,7 +23,7 @@ module "condor" {
 }
 ```
 2. Configure the [Required Inputs](https://registry.terraform.io/modules/linode/k8s/linode/latest?tab=inputs#required-inputs):
-  * `provisioner_public_key` -  For example, using Terraform functions: `chomp(file("~/.ssh/id_rsa.pub"))`
+  * `provisioner_public_key` -  For example, using Terraform functions: `chomp(file("~/.ssh/id_rsa.pub"))`.
   * `cluster_vultr_api_key` - This is a Vultr API Key to be used by the Vultr CCM and CSI Kubernetes Addons and should be different from your Terraform provisioning API Key(however can be re-used for testing). Can be configured as an environment variable in your shell(Recommended) or as a string in your `main.tf`(Only recommended for testing).
 
 3. Configure the [Optional Inputs](https://registry.terraform.io/modules/linode/k8s/linode/latest?tab=inputs#optional-inputs) if you wish to change from the defaults.
