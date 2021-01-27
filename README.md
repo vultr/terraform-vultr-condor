@@ -35,10 +35,10 @@ module "condor" {
 terraform init && terraform apply
 ```
 
-5. Check your cluster:
+5. The Admin Kubeconfig is copied to your working directory, check your cluster:
 
 ``` sh
-kubectl get no --kubeconfig ~/.kube/condor/<cluster-name>-<cluster-id>/config
+kubectl get no --kubeconfig ./admin.conf
 NAME                                        STATUS   ROLES                  AGE   VERSION
 <cluster-name>-<cluster-id>-controller-0   Ready    control-plane,master   16h   v1.20.2
 <cluster-name>-<cluster-id>-worker-0       Ready    <none>                 16h   v1.20.2
@@ -46,4 +46,5 @@ NAME                                        STATUS   ROLES                  AGE 
 ```
 
 ## Notes
+ * The Admin Kubeconfig is copied to the directory that your Terraform plan was ran from and is stored as `admin.conf`. An `admin.conf.bak` file is also created, which contains the control plane private IP and cannot be used remotely. 
  * If an Existing Firewall Group ID is not provided via the `firewall_group_id` input, an empty Vultr Firewall Group will be created and exposed via the `condor_firewall_group_id` output. You may wish to configure firewall rules in your `main.tf` referencing the `condor_firewall_group_id` output to lock down your cluster as needed. 
