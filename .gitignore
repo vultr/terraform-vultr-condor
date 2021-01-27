@@ -1,5 +1,5 @@
 *.env
 .terraform
 terraform.tfstate*
-admin.conf
+admin.conf*
 .DS_Store

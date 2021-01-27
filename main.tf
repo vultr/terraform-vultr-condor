@@ -158,6 +158,10 @@ resource "null_resource" "cluster_init" {
       "/tmp/condor-init.sh",
     ]
   }
+
+  provisioner "local-exec" {
+    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_instance.controllers[0].main_ip}:/root/.kube/config admin.conf && sed -i.bak 's/${vultr_instance.controllers[0].internal_ip}/${vultr_instance.controllers[0].main_ip}/g' admin.conf"
+  }
 }
 
 resource "null_resource" "worker_join" {
@@ -212,9 +216,5 @@ resource "null_resource" "worker_join" {
       "kubeadm token delete $(cat /tmp/worker-${count.index}-join | awk '{print $5}')",
       "rm -f /tmp/worker-${count.index}-join"
     ]
-  }
-
-  provisioner "local-exec" {
-    command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_instance.controllers[0].main_ip}:/root/.kube/config admin.conf && mkdir -p ~/.kube/condor/${local.cluster_name} && sed 's/${vultr_instance.controllers[0].internal_ip}/${vultr_instance.controllers[0].main_ip}/g' admin.conf > ~/.kube/condor/${local.cluster_name}/config"
   }
 }
