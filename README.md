@@ -35,7 +35,7 @@ module "condor" {
 terraform init && terraform apply
 ```
 
-5. The Admin Kubeconfig is copied to your working directory, check your cluster:
+5. The Admin Kubeconfig is copied to your working directory(`admin.conf`), check your cluster:
 
 ``` sh
 kubectl get no --kubeconfig ./admin.conf
