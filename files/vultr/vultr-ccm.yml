@@ -142,7 +142,7 @@ spec:
           effect: NoSchedule
       hostNetwork: true
       containers:
-        - image: vultr/vultr-cloud-controller-manager:v${ VULTR_CCM_VERSION }
+        - image: vultr/vultr-cloud-controller-manager:${ VULTR_CCM_VERSION }
           name: vultr-cloud-controller-manager
           command:
             - "/vultr-cloud-controller-manager"
