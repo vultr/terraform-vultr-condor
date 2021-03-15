@@ -28,96 +28,6 @@ metadata:
 provisioner: block.csi.vultr.com
 reclaimPolicy: Retain
 
-#########
-### CRDs
-#########
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: csinodeinfos.csi.storage.k8s.io
-  labels:
-    addonmanager.kubernetes.io/mode: Reconcile
-spec:
-  group: csi.storage.k8s.io
-  version: v1alpha1
-  names:
-    kind: CSINodeInfo
-    plural: csinodeinfos
-  scope: Cluster
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          description: Specification of CSINodeInfo
-          properties:
-            drivers:
-              description: List of CSI drivers running on the node and their specs.
-              type: array
-              items:
-                properties:
-                  name:
-                    description: The CSI driver that this object refers to.
-                    type: string
-                  nodeID:
-                    description: The node from the driver point of view.
-                    type: string
-                  topologyKeys:
-                    description: List of keys supported by the driver.
-                    items:
-                      type: string
-                    type: array
-        status:
-          description: Status of CSINodeInfo
-          properties:
-            drivers:
-              description: List of CSI drivers running on the node and their statuses.
-              type: array
-              items:
-                properties:
-                  name:
-                    description: The CSI driver that this object refers to.
-                    type: string
-                  available:
-                    description: Whether the CSI driver is installed.
-                    type: boolean
-                  volumePluginMechanism:
-                    description: Indicates to external components the required mechanism
-                      to use for any in-tree plugins replaced by this driver.
-                    pattern: in-tree|csi
-                    type: string
-
----
-apiVersion: apiextensions.k8s.io/v1beta1
-kind: CustomResourceDefinition
-metadata:
-  name: csidrivers.csi.storage.k8s.io
-  labels:
-    addonmanager.kubernetes.io/mode: Reconcile
-spec:
-  version: v1alpha1
-  group: csi.storage.k8s.io
-  names:
-    kind: CSIDriver
-    plural: csidrivers
-  scope: Cluster
-  validation:
-    openAPIV3Schema:
-      properties:
-        spec:
-          description: Specification of the CSI Driver.
-          properties:
-            attachRequired:
-              description: Indicates this CSI volume driver requires an attach operation,
-                and that Kubernetes should call attach and wait for any attach operation
-                to complete before proceeding to mount.
-              type: boolean
-            podInfoOnMountVersion:
-              description: Indicates this CSI volume driver requires additional pod
-                information (like podName, podUID, etc.) during mount operations.
-              type: string
-
-
 ###################
 ### CSI Controller
 ###################
@@ -142,7 +52,7 @@ spec:
       serviceAccountName: csi-vultr-controller-sa
       containers:
         - name: csi-provisioner
-          image: quay.io/k8scsi/csi-provisioner:v1.6.0
+          image: quay.io/k8scsi/csi-provisioner:v2.0.4
           args:
             - "--volume-name-prefix=pvc"
             - "--volume-name-uuid-length=16"
@@ -156,7 +66,7 @@ spec:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
         - name: csi-attacher
-          image: quay.io/k8scsi/csi-attacher:v2.2.0
+          image: quay.io/k8scsi/csi-attacher:v3.0.2
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
@@ -167,9 +77,9 @@ spec:
           volumeMounts:
             - name: socket-dir
               mountPath: /var/lib/csi/sockets/pluginproxy/
-        - name: vultr-csi-plugin
+        - name: csi-vultr-plugin
           image: vultr/vultr-csi:${ VULTR_CSI_VERSION }
-          args :
+          args:
             - "--endpoint=$(CSI_ENDPOINT)"
             - "--token=$(VULTR_API_KEY)"
           env:
@@ -178,7 +88,7 @@ spec:
             - name: VULTR_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: vultr-api-key
+                  name: vultr-csi
                   key: api-key
           imagePullPolicy: "Always"
           volumeMounts:
@@ -186,7 +96,7 @@ spec:
               mountPath: /var/lib/csi/sockets/pluginproxy/
       volumes:
         - name: socket-dir
-          emptyDir: {}
+          emptyDir: { }
 
 ---
 apiVersion: v1
@@ -203,18 +113,21 @@ metadata:
   name: csi-vultr-attacher-role
   namespace: kube-system
 rules:
-  - apiGroups: [""]
-    resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "update", "patch"]
-  - apiGroups: [""]
-    resources: ["nodes"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["csinodes"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["volumeattachments"]
-    verbs: ["get", "list", "watch", "update", "patch"]
+  - apiGroups: [ "" ]
+    resources: [ "persistentvolumes" ]
+    verbs: [ "get", "list", "watch", "update", "patch" ]
+  - apiGroups: [ "" ]
+    resources: [ "nodes" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources: [ "csinodes" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources: [ "volumeattachments" ]
+    verbs: [ "get", "list", "watch", "update", "patch" ]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources: [ "volumeattachments/status" ]
+    verbs: [ "patch" ]
 
 ---
 kind: ClusterRoleBinding
@@ -239,27 +152,30 @@ metadata:
   name: csi-vultr-provisioner-role
   namespace: kube-system
 rules:
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list"]
-  - apiGroups: [""]
-    resources: ["persistentvolumes"]
-    verbs: ["get", "list", "watch", "create", "delete"]
-  - apiGroups: [""]
-    resources: ["persistentvolumeclaims"]
-    verbs: ["get", "list", "watch", "update"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["storageclasses"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["storage.k8s.io"]
-    resources: ["csinodes"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["list", "watch", "create", "update", "patch"]
-  - apiGroups: [""]
-    resources: ["nodes"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: [ "" ]
+    resources: [ "secrets" ]
+    verbs: [ "get", "list" ]
+  - apiGroups: [ "" ]
+    resources: [ "persistentvolumes" ]
+    verbs: [ "get", "list", "watch", "create", "delete" ]
+  - apiGroups: [ "" ]
+    resources: [ "persistentvolumeclaims" ]
+    verbs: [ "get", "list", "watch", "update" ]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources: [ "storageclasses" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources: [ "csinodes" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "" ]
+    resources: [ "events" ]
+    verbs: [ "list", "watch", "create", "update", "patch" ]
+  - apiGroups: [ "" ]
+    resources: [ "nodes" ]
+    verbs: [ "get", "list", "watch" ]
+  - apiGroups: [ "storage.k8s.io" ]
+    resources: [ "volumeattachments" ]
+    verbs: [ "get", "list", "watch" ]
 
 ---
 kind: ClusterRoleBinding
@@ -300,7 +216,7 @@ spec:
       hostNetwork: true
       containers:
         - name: driver-registrar
-          image: quay.io/k8scsi/csi-node-driver-registrar:v1.3.0
+          image: quay.io/k8scsi/csi-node-driver-registrar:v2.0.1
           args:
             - "--v=5"
             - "--csi-address=$(ADDRESS)"
@@ -321,7 +237,7 @@ spec:
               mountPath: /registration/
         - name: csi-vultr-plugin
           image: vultr/vultr-csi:${ VULTR_CSI_VERSION }
-          args :
+          args:
             - "--endpoint=$(CSI_ENDPOINT)"
           env:
             - name: CSI_ENDPOINT
@@ -330,7 +246,7 @@ spec:
           securityContext:
             privileged: true
             capabilities:
-              add: ["SYS_ADMIN"]
+              add: [ "SYS_ADMIN" ]
             allowPrivilegeEscalation: true
           volumeMounts:
             - name: plugin-dir
@@ -406,6 +322,6 @@ metadata:
   name: csi-vultr-node-driver-registrar-role
   namespace: kube-system
 rules:
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["get", "list", "watch", "create", "update", "patch"]
+  - apiGroups: [ "" ]
+    resources: [ "events" ]
+    verbs: [ "get", "list", "watch", "create", "update", "patch" ]
