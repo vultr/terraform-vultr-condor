@@ -134,8 +134,8 @@ variable "extra_public_keys" {
   default     = []
 }
 
-variable "kube_flannel_version" {
-  description = "Version of Flannel Network Overlay to install as your cluster CNI."
+variable "kube_calico_version" {
+  description = "Version of Calico Network Overlay to install as your cluster CNI."
   type        = string
-  default     = "0.13.0"
+  default     = "3.18"
 }
