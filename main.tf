@@ -152,7 +152,7 @@ resource "null_resource" "cluster_init" {
   }
 
   provisioner "file" {
-    content     = templatefile("${path.module}/scripts/condor-init.sh", { VULTR_CCM_VERSION = var.vultr_ccm_version, VULTR_CSI_VERSION = var.vultr_csi_version, KUBE_FLANNEL_VERSION = var.kube_flannel_version })
+    content     = templatefile("${path.module}/scripts/condor-init.sh", { VULTR_CCM_VERSION = var.vultr_ccm_version, VULTR_CSI_VERSION = var.vultr_csi_version, KUBE_CALICO_VERSION = var.kube_calico_version })
     destination = "/tmp/condor-init.sh"
   }
 

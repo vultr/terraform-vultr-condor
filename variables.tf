@@ -115,7 +115,7 @@ variable "vultr_ccm_version" {
 variable "vultr_csi_version" {
   description = "Version of the Vultr Container Storage Interface to install in the Cluster."
   type        = string
-  default     = "v0.0.4"
+  default     = "v0.1.0"
 }
 
 variable "cluster_vultr_api_key" {
@@ -134,10 +134,10 @@ variable "extra_public_keys" {
   default     = []
 }
 
-variable "kube_flannel_version" {
-  description = "Version of Flannel Network Overlay to install as your cluster CNI."
+variable "kube_calico_version" {
+  description = "Version of Calico Network Overlay to install as your cluster CNI."
   type        = string
-  default     = "0.13.0"
+  default     = "3.18"
 }
 
 variable "custom_snapshot_description" {
