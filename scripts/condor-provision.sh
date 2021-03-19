@@ -8,9 +8,11 @@ INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
 PUBLIC_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | select(.["network-type"]=="public") | .mac')
 PRIVATE_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | select(.["network-type"]=="private") | .mac')
+HOSTNAME=$(curl --silent 169.254.169.254/v1.json | jq -r '.hostname')
 
 CONTAINERD_RELEASE="${CONTAINERD_RELEASE}"
 K8_VERSION="${K8_VERSION}"
+PRE_PROVISIONED=${PRE_PROVISIONED}
 FILES_TO_CLEAN="/tmp/condor-provision.sh"
 
 system_config(){
