@@ -24,7 +24,7 @@ module "condor" {
 }
 ```
 2. Configure the [Required Inputs](https://registry.terraform.io/modules/vultr/condor/vultr/latest?tab=inputs#required-inputs):
-  * `provisioner_public_key` -  For example, using Terraform functions: `chomp(file("~/.ssh/id_rsa.pub"))`, or as a string. Note: You will need to have an SSH Agent configured with the accompanying private key
+  * `provisioner_public_key` -  For example, using Terraform functions: `chomp(file("~/.ssh/id_rsa.pub"))`, or as a string. Note: You will need to have an SSH Agent configured with the accompanying private key:
 
 ``` sh
 $ ssh-add ~/.ssh/id_rsa
