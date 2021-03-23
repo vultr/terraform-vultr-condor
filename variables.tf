@@ -139,3 +139,9 @@ variable "kube_calico_version" {
   type        = string
   default     = "3.18"
 }
+
+variable "custom_snapshot_description" {
+  description = "A pre-provisioned Condor snapshot(built from packer-vultr-condor) description. For improved stability and deployment time. Note: description must be unique to one snapshot on your account."
+  type = string
+  default = ""
+}

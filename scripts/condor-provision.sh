@@ -8,10 +8,17 @@ INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
 PUBLIC_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | select(.["network-type"]=="public") | .mac')
 PRIVATE_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | select(.["network-type"]=="private") | .mac')
+HOSTNAME=$(curl --silent 169.254.169.254/v1.json | jq -r '.hostname')
 
 CONTAINERD_RELEASE="${CONTAINERD_RELEASE}"
 K8_VERSION="${K8_VERSION}"
+PRE_PROVISIONED=${PRE_PROVISIONED}
 FILES_TO_CLEAN="/tmp/condor-provision.sh"
+
+set_hostname(){
+	echo $HOSTNAME > /etc/hostname
+	hostnamectl set-hostname $HOSTNAME
+}
 
 system_config(){
 	cat <<-EOF > /etc/modules-load.d/containerd.conf
@@ -33,7 +40,7 @@ system_config(){
 network_config(){
 	cat <<-EOF > /etc/systemd/network/public.network
 		[Match]
-		MACAddress=$PUBLIC_MAC
+		Name=ens3
 
 		[Network]
 		DHCP=yes
@@ -41,7 +48,7 @@ network_config(){
 
 	cat <<-EOF > /etc/systemd/network/private.network
 		[Match]
-		MACAddress=$PRIVATE_MAC
+		Name=ens7
 
 		[Network]
 		Address=$PRIVATE_IP
@@ -49,6 +56,7 @@ network_config(){
 
 	systemctl enable systemd-networkd systemd-resolved
 	systemctl restart systemd-networkd systemd-resolved
+	systemctl disable networking
 }
 
 install_containerd(){
@@ -84,10 +92,16 @@ clean(){
 }
 
 main(){
-	system_config
-	network_config
-	install_containerd
-	install_k8
+	if [ "$PRE_PROVISIONED" = true ]; then
+	    set_hostname
+	    network_config
+	else
+		system_config
+		network_config
+		install_containerd
+		install_k8
+	fi
+
 	clean
 }
 

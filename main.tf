@@ -1,6 +1,7 @@
 locals {
   cluster_name        = "${var.cluster_name}-${random_id.cluster.hex}"
   cluster_public_keys = concat([vultr_ssh_key.cluster_provisioner.id], vultr_ssh_key.extra_public_keys.*.id)
+  pre_provisioned     = var.custom_snapshot_description != "" ? true : false
 }
 
 resource "vultr_ssh_key" "cluster_provisioner" {
@@ -18,6 +19,14 @@ data "vultr_os" "cluster_os" {
   filter {
     name   = "name"
     values = [var.cluster_os]
+  }
+}
+
+data "vultr_snapshot" "cluster_snapshot" {
+  count = var.custom_snapshot_description != "" ? 1 : 0
+  filter {
+    name   = "description"
+    values = [var.custom_snapshot_description]
   }
 }
 
@@ -41,7 +50,8 @@ resource "vultr_instance" "controllers" {
   count               = var.controller_count
   plan                = var.controller_machine_type
   region              = var.cluster_region
-  os_id               = data.vultr_os.cluster_os.id
+  os_id               = local.pre_provisioned ? null : data.vultr_os.cluster_os.id
+  snapshot_id         = local.pre_provisioned ? data.vultr_snapshot.cluster_snapshot[0].id : ""
   label               = "${local.cluster_name}-controller-${count.index}"
   hostname            = "${local.cluster_name}-controller-${count.index}"
   tag                 = var.tag
@@ -56,12 +66,11 @@ resource "vultr_instance" "controllers" {
   connection {
     type     = "ssh"
     user     = "root"
-    password = self.default_password
     host     = self.main_ip
   }
 
   provisioner "file" {
-    content     = templatefile("${path.module}/scripts/condor-provision.sh", { CONTAINERD_RELEASE = var.containerd_release, K8_VERSION = var.k8_version })
+    content     = templatefile("${path.module}/scripts/condor-provision.sh", { CONTAINERD_RELEASE = var.containerd_release, K8_VERSION = var.k8_version, PRE_PROVISIONED = local.pre_provisioned })
     destination = "/tmp/condor-provision.sh"
   }
 
@@ -86,7 +95,8 @@ resource "vultr_instance" "workers" {
   count               = var.worker_count
   plan                = var.worker_machine_type
   region              = var.cluster_region
-  os_id               = data.vultr_os.cluster_os.id
+  os_id               = local.pre_provisioned ? null : data.vultr_os.cluster_os.id
+  snapshot_id         = local.pre_provisioned ? data.vultr_snapshot.cluster_snapshot[0].id : ""
   label               = "${local.cluster_name}-worker-${count.index}"
   hostname            = "${local.cluster_name}-worker-${count.index}"
   tag                 = var.tag
@@ -101,12 +111,11 @@ resource "vultr_instance" "workers" {
   connection {
     type     = "ssh"
     user     = "root"
-    password = self.default_password
     host     = self.main_ip
   }
 
   provisioner "file" {
-    content     = templatefile("${path.module}/scripts/condor-provision.sh", { CONTAINERD_RELEASE = var.containerd_release, K8_VERSION = var.k8_version })
+    content     = templatefile("${path.module}/scripts/condor-provision.sh", { CONTAINERD_RELEASE = var.containerd_release, K8_VERSION = var.k8_version, PRE_PROVISIONED = local.pre_provisioned })
     destination = "/tmp/condor-provision.sh"
   }
 
@@ -134,7 +143,6 @@ resource "null_resource" "cluster_init" {
     type     = "ssh"
     user     = "root"
     host     = vultr_instance.controllers[0].main_ip
-    password = vultr_instance.controllers[0].default_password
   }
 
   provisioner "file" {
@@ -178,7 +186,6 @@ resource "null_resource" "worker_join" {
       type     = "ssh"
       host     = vultr_instance.controllers[0].main_ip
       user     = "root"
-      password = vultr_instance.controllers[0].default_password
     }
 
     inline = [
@@ -195,7 +202,6 @@ resource "null_resource" "worker_join" {
       type     = "ssh"
       host     = vultr_instance.workers[count.index].main_ip
       user     = "root"
-      password = vultr_instance.workers[count.index].default_password
     }
 
     inline = [
@@ -209,7 +215,6 @@ resource "null_resource" "worker_join" {
       type     = "ssh"
       host     = vultr_instance.controllers[0].main_ip
       user     = "root"
-      password = vultr_instance.controllers[0].default_password
     }
 
     inline = [
