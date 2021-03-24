@@ -6,7 +6,6 @@
 ### Breaking Changes
 * Requires a configured ssh-agent for instance access
 
-* Remove leading `v` in Vultr CCM and CSI version strings to support named tags, e.g. `latest`, `nightly`, etc.
 ## [v1.0.1](https://github.com/vultr/terraform-vultr-condor/releases/tag/v1.0.1) (2021-02-16)
 ### Bug Fixes
 * Remove leading `v` in Vultr CCM and CSI version strings to support named tags, e.g. `latest`, `nightly`, etc.
