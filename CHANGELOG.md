@@ -1,4 +1,8 @@
 # Change Log
+## [v1.1.1](https://github.com/vultr/terraform-vultr-condor/releases/tag/v1.1.1) (2021-03-25)
+### Fixes
+* Bump CCM and CSI versions for Vultr Metadata Fix
+
 ## [v1.1.0](https://github.com/vultr/terraform-vultr-condor/releases/tag/v1.1.0) (2021-03-24)
 ### Features
 * Pre-provisioned image option for use with [packer-vultr-condor](https://github.com/vultr/packer-vultr-condor)
