@@ -19,7 +19,7 @@ Usage and input details can be found in the [Terraform Module Registry Docs](htt
 
 module "condor" {
   source                 = "vultr/condor/vultr"
-  version                = "1.0.0"
+  version                = "1.1.1"
   provisioner_public_key = chomp(file("~/.ssh/id_rsa.pub"))
 }
 ```
