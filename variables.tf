@@ -36,8 +36,8 @@ variable "enable_ipv6" {
 
 variable "enable_backups" {
   description = "Enable/disable instance backups"
-  type        = bool
-  default     = false
+  type        = string
+  default     = "disabled"
 }
 
 variable "enable_ddos_protection" {
