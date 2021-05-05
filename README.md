@@ -23,6 +23,7 @@ module "condor" {
   provisioner_public_key = chomp(file("~/.ssh/id_rsa.pub"))
 }
 ```
+
 2. Configure the [Required Inputs](https://registry.terraform.io/modules/vultr/condor/vultr/latest?tab=inputs#required-inputs):
   * `provisioner_public_key` -  For example, using Terraform functions: `chomp(file("~/.ssh/id_rsa.pub"))`, or as a string. Note: You will need to have an SSH Agent configured with the accompanying private key:
 
@@ -34,12 +35,18 @@ $ ssh-add ~/.ssh/id_rsa
 
 3. Configure the [Optional Inputs](https://registry.terraform.io/modules/vultr/condor/vultr/latest?tab=inputs#optional-inputs) if you wish to change from the defaults.
 
-4. Deploy
+4. Set the [Vultr](https://registry.terraform.io/providers/vultr/vultr/latest/docs) provider `api_key` argument, e.g. as an environment variable(recommended)
+
+``` sh
+export VULTR_API_KEY="<api-key-here>"
+```
+
+5. Deploy
 ``` sh
 terraform init && terraform apply
 ```
 
-5. The Admin Kubeconfig is copied to your working directory(`admin.conf`), check your cluster:
+6. The Admin Kubeconfig is copied to your working directory(`admin.conf`), check your cluster:
 
 ``` sh
 kubectl get no --kubeconfig ./admin.conf
