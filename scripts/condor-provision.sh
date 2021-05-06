@@ -1,8 +1,16 @@
 #!/usr/bin/env bash
 set -euxo posix
 
-apt -y update
-apt -y install jq gnupg2
+safe_apt(){
+	while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1 ; do
+		echo "Waiting for apt lock..."
+		sleep 1
+	done
+	apt "$@"
+}
+
+safe_apt -y update
+safe_apt -y install jq gnupg2
 
 INSTANCE_METADATA=$(curl --silent http://169.254.169.254/v1.json)
 PRIVATE_IP=$(echo $INSTANCE_METADATA | jq -r .interfaces[1].ipv4.address)
@@ -60,15 +68,15 @@ network_config(){
 }
 
 install_containerd(){
-	apt -y update
-	apt -y install apt-transport-https ca-certificates curl software-properties-common
+	safe_apt -y update
+	safe_apt -y install apt-transport-https ca-certificates curl software-properties-common
 
 	curl -fsSL https://download.docker.com/linux/debian/gpg | sudo apt-key --keyring /etc/apt/trusted.gpg.d/docker.gpg add -
 
     add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"
 
-	apt -y update
-	apt -y install containerd.io=$CONTAINERD_RELEASE
+	safe_apt -y update
+	safe_apt -y install containerd.io=$CONTAINERD_RELEASE
 }
 
 install_k8(){
@@ -78,8 +86,8 @@ install_k8(){
 		deb https://apt.kubernetes.io/ kubernetes-xenial main
 		EOF
 
-	apt -y update
-	apt -y install kubelet=$K8_VERSION kubeadm=$K8_VERSION kubectl=$K8_VERSION
+	safe_apt -y update
+	safe_apt -y install kubelet=$K8_VERSION kubeadm=$K8_VERSION kubectl=$K8_VERSION
 	apt-mark hold kubelet kubeadm kubectl
 
 	cat <<-EOF > /etc/default/kubelet
