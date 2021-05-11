@@ -55,7 +55,7 @@ system_config(){
 firewall_config(){
 	case $NODE_ROLE in
 		controller)
-			for port in $CONTROL_PLANE_PORTS; do
+			for port in "$${CONTROL_PLANE_PORTS[@]}"; do
 				ufw allow $port
 			done
 			;;
