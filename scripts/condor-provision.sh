@@ -18,10 +18,18 @@ PUBLIC_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | sele
 PRIVATE_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[] | select(.["network-type"]=="private") | .mac')
 HOSTNAME=$(curl --silent 169.254.169.254/v1.json | jq -r '.hostname')
 
+if [ $(echo $HOSTNAME | grep controller) ]; then
+	NODE_ROLE=controller
+elif [ $(echo $HOSTNAME | grep worker) ]; then
+	NODE_ROLE=worker
+fi
+
 CONTAINERD_RELEASE="${CONTAINERD_RELEASE}"
 K8_VERSION="${K8_VERSION}"
 PRE_PROVISIONED=${PRE_PROVISIONED}
 FILES_TO_CLEAN="/tmp/condor-provision.sh"
+CONTROL_PLANE_PORTS=(6443 2379 2380 10250 10251 10252)
+WORKER_NODE_PORTS=(10250 30000-32767)
 
 set_hostname(){
 	echo $HOSTNAME > /etc/hostname
@@ -45,7 +53,26 @@ system_config(){
 	sysctl --system
 }
 
+firewall_config(){
+	case $NODE_ROLE in
+		controller)
+			for port in $CONTROL_PLANE_PORTS; do
+				ufw allow $port
+			done
+			;;
+		worker)
+			for port in $WORKER_NODE_PORTS; do
+				ufw allow $port
+			done
+			;;
+	esac
+
+	ufw reload
+}
+
 network_config(){
+	firewall_config
+
 	cat <<-EOF > /etc/systemd/network/public.network
 		[Match]
 		Name=ens3
