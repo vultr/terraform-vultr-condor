@@ -57,11 +57,13 @@ firewall_config(){
 		controller)
 			for port in "$${CONTROL_PLANE_PORTS[@]}"; do
 				ufw allow $port
+				ufw allow in on ens7
 			done
 			;;
 		worker)
 			ufw allow 10250
 			ufw allow 30000:32767/tcp
+			ufw allow in on ens7
 			;;
 	esac
 
