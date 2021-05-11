@@ -29,7 +29,7 @@ K8_VERSION="${K8_VERSION}"
 PRE_PROVISIONED=${PRE_PROVISIONED}
 FILES_TO_CLEAN="/tmp/condor-provision.sh"
 CONTROL_PLANE_PORTS=(6443 2379 2380 10250 10251 10252)
-WORKER_NODE_PORTS=(10250 30000-32767)
+WORKER_NODE_PORTS=(10250 "30000:32767/tcp")
 
 set_hostname(){
 	echo $HOSTNAME > /etc/hostname
@@ -61,9 +61,8 @@ firewall_config(){
 			done
 			;;
 		worker)
-			for port in $WORKER_NODE_PORTS; do
-				ufw allow $port
-			done
+			ufw allow 10250
+			ufw allow 30000:32767/tcp
 			;;
 	esac
 
