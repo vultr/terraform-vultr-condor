@@ -121,6 +121,7 @@ variable "vultr_csi_version" {
 variable "cluster_vultr_api_key" {
   description = "Vultr API Key to be used by the Vultr CCM and Vultr CSI. This may be the same API key as your Terraform Vultr API Key, however it is recommended you use a separate key."
   type        = string
+  sensitive   = true
 }
 
 variable "provisioner_public_key" {

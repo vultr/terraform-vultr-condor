@@ -151,13 +151,8 @@ resource "null_resource" "cluster_init" {
   }
 
   provisioner "file" {
-    content     = templatefile("${path.module}/scripts/condor-init.sh", { VULTR_CCM_VERSION = var.vultr_ccm_version, VULTR_CSI_VERSION = var.vultr_csi_version, KUBE_CALICO_VERSION = var.kube_calico_version })
+    content     = file("${path.module}/scripts/condor-init.sh")
     destination = "/tmp/condor-init.sh"
-  }
-
-  provisioner "file" {
-    content     = templatefile("${path.module}/files/vultr/vultr-api-key.yml", { CLUSTER_VULTR_API_KEY = var.cluster_vultr_api_key, CLUSTER_REGION = var.cluster_region })
-    destination = "/tmp/vultr-api-key.yml"
   }
 
   provisioner "remote-exec" {
@@ -169,6 +164,104 @@ resource "null_resource" "cluster_init" {
 
   provisioner "local-exec" {
     command = "scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null root@${vultr_instance.controllers[0].main_ip}:/root/.kube/config admin.conf && sed -i.bak 's/${vultr_instance.controllers[0].internal_ip}/${vultr_instance.controllers[0].main_ip}/g' admin.conf"
+  }
+}
+
+resource "null_resource" "calico_cni" {
+  depends_on = [ null_resource.cluster_init ]
+
+  triggers = {
+    calico_version = var.kube_calico_version
+  }
+
+  connection {
+    type     = "ssh"
+    user     = "root"
+    host     = vultr_instance.controllers[0].main_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "kubectl apply -f https://docs.projectcalico.org/v${var.kube_calico_version}/manifests/calico.yaml"
+    ]
+  }
+}
+
+resource "null_resource" "vultr_ccm_api_key" {
+  depends_on = [ null_resource.cluster_init ]
+
+  triggers = {
+    ccm_api_key = var.cluster_vultr_api_key
+  }
+
+  connection {
+    type     = "ssh"
+    user     = "root"
+    host     = vultr_instance.controllers[0].main_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      <<-EOT
+        cat <<-EOF | kubectl apply -f -
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vultr-ccm
+  namespace: kube-system
+stringData:
+  api-key: "${var.cluster_vultr_api_key}"
+  region: "${var.cluster_region}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: vultr-csi
+  namespace: kube-system
+stringData:
+  api-key: "${var.cluster_vultr_api_key}"
+      EOT
+    ]
+  }
+}
+
+resource "null_resource" "vultr_ccm" {
+  depends_on = [ null_resource.cluster_init ]
+
+  triggers = {
+    ccm_version = var.vultr_ccm_version
+  }
+
+  connection {
+    type     = "ssh"
+    user     = "root"
+    host     = vultr_instance.controllers[0].main_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "kubectl apply -f https://raw.githubusercontent.com/vultr/vultr-cloud-controller-manager/master/docs/releases/${var.vultr_ccm_version}.yml"
+    ]
+  }
+}
+
+resource "null_resource" "vultr_csi" {
+  depends_on = [ null_resource.cluster_init ]
+
+  triggers = {
+    csi_version = var.vultr_csi_version
+  }
+
+  connection {
+    type     = "ssh"
+    user     = "root"
+    host     = vultr_instance.controllers[0].main_ip
+  }
+
+  provisioner "remote-exec" {
+    inline = [
+      "kubectl apply -f https://raw.githubusercontent.com/vultr/vultr-csi/master/docs/releases/${var.vultr_csi_version}.yml"
+    ]
   }
 }
 
