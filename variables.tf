@@ -109,13 +109,13 @@ variable "pod_network_cidr" {
 variable "vultr_ccm_version" {
   description = "Version of the Vultr Cloud Controller Manager to install in the Cluster."
   type        = string
-  default     = "v0.1.2"
+  default     = "latest"
 }
 
 variable "vultr_csi_version" {
   description = "Version of the Vultr Container Storage Interface to install in the Cluster."
   type        = string
-  default     = "v0.1.1"
+  default     = "latest"
 }
 
 variable "cluster_vultr_api_key" {
