@@ -1,4 +1,14 @@
 # Change Log
+## [v1.2.0](https://github.com/vultr/terraform-vultr-condor/releases/tag/v1.2.0) (2021-06-01)
+### Features
+* Vultr CCM, Vultr CSI, and Calico CNI resources are automatically updated on changes to their version variables. 
+### Changes
+* Vultr component(CCM and CSI) versions now default to `latest`.
+* Calico CNI version now defaults to `3.19`.
+* Add Vultr CCM Terraform resource.
+* Add Vultr CSI Terraform resource.
+* Add Calico CNI Terraform resource.
+
 ## [v1.1.1](https://github.com/vultr/terraform-vultr-condor/releases/tag/v1.1.1) (2021-03-25)
 ### Fixes
 * Bump CCM and CSI versions for Vultr Metadata Fix
