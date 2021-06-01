@@ -109,18 +109,19 @@ variable "pod_network_cidr" {
 variable "vultr_ccm_version" {
   description = "Version of the Vultr Cloud Controller Manager to install in the Cluster."
   type        = string
-  default     = "v0.1.2"
+  default     = "latest"
 }
 
 variable "vultr_csi_version" {
   description = "Version of the Vultr Container Storage Interface to install in the Cluster."
   type        = string
-  default     = "v0.1.1"
+  default     = "latest"
 }
 
 variable "cluster_vultr_api_key" {
   description = "Vultr API Key to be used by the Vultr CCM and Vultr CSI. This may be the same API key as your Terraform Vultr API Key, however it is recommended you use a separate key."
   type        = string
+  sensitive   = true
 }
 
 variable "provisioner_public_key" {
@@ -137,7 +138,7 @@ variable "extra_public_keys" {
 variable "kube_calico_version" {
   description = "Version of Calico Network Overlay to install as your cluster CNI."
   type        = string
-  default     = "3.18"
+  default     = "3.19"
 }
 
 variable "custom_snapshot_description" {
