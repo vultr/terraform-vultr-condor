@@ -1,0 +1,9 @@
+.DS_Store
+.idea
+*.log
+*.env
+tmp/
+admin.conf
+k0sctl.yaml
+terraform.tfstate*
+.terraform
