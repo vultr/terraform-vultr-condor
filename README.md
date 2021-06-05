@@ -2,7 +2,7 @@
 
 ## Requirements
   * A funded Vultr account and API Key, should be configured as an environment variable to be consumed by the Terraform provider:
-  ````sh
+  ```sh
   export VULTR_API_KEY="<api-key-here>"
   ```
   * The [k0sctl](https://github.com/k0sproject/k0sctl) executable must be installed and in your executable path.
