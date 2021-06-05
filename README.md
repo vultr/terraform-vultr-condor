@@ -24,7 +24,7 @@ Usage and input details can be found in the [Terraform Module Registry Docs](htt
 
 module "k0s" {
   source                 = "3letteragency/k0s/vultr"
-  version                = "1.0.0"
+  version                = "1.0.1"
   provisioner_public_key = chomp(file("~/.ssh/id_rsa.pub")) 
   cluster_vultr_api_key  = "<vultr-api-key>" # 
 }
