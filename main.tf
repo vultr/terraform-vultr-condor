@@ -176,11 +176,6 @@ resource "null_resource" "k0s" {
     kube_proxy_version     = var.kube_proxy_version
     core_dns_version       = var.core_dns_version
     calico_version         = var.calico_version
-    enable_vultr           = var.enable_vultr
-    ccm_version            = var.vultr_ccm_version
-    csi_version            = var.vultr_csi_version
-    ccm_chart_version      = var.ccm_chart_version
-    csi_chart_version      = var.csi_chart_version
   }
 
   provisioner "local-exec" {
