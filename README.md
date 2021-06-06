@@ -3,7 +3,6 @@
 #### Table of Contents
 [Requirements](#requirements)
 
-<a name="requirements"/>
 ## Requirements
   * A funded Vultr account and API Key, should be configured as an environment variable to be consumed by the Terraform provider:
   ```sh
