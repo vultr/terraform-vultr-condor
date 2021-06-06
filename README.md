@@ -92,3 +92,4 @@ Please note the [Helm Chart Deployer](https://docs.k0sproject.io/v1.21.1+k0s.0/h
 
 ## Limitations
 * Shrinking of the Control Plane is not supported, only growing. You will need to manually run `k0s etcd leave` on all Control Plane nodes with index > 0 prior to shrinking the `controller_count`. An initial attempt was made to implement this in a destroy time provisioner, however it caused issues when running `terraform destroy` to destroy the entire plan. This may be revisited at a later date. 
+* Etcd running on the Control Plane currently goes over the public network due to k0sctl configuration limitaitons - each controllers respective `spec.k0s.spec.storage.peerAddress` parameters would require different values. The Cluster Vultr Firewall allows only Control plane nodes to access the Etcd port(`2380`). Will likely revisit this or look into a PR to K0sctl so that the private network may be used. 
