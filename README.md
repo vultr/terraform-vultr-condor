@@ -1,5 +1,7 @@
 # Vultr k0s
 
+[Terraform Module Registry Docs](https://registry.terraform.io/modules/3letteragency/k0s/vultr/latest)
+
 #### Table of Contents
 * [Requirements](#requirements)
 * [Quick Start](#quick-start)
