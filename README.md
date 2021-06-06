@@ -1,7 +1,13 @@
 # Vultr k0s
 
 #### Table of Contents
-[Requirements](#requirements)
+* [Requirements](#requirements)
+* [Quick Start](#quick-start)
+* [Firewall Configuration](#firewall-configuration)
+  * [Control Plane HA VLB Firewall](#control-plane-ha-vlb-firewall)
+  * [Cluster Nodes Vultr Firewall](#cluster-nodes-vultr-firewall)
+* [Extensions](#extensions)
+* [Limitagions](#limitagions)
 
 ## Requirements
   * A funded Vultr account and API Key, should be configured as an environment variable to be consumed by the Terraform provider:
