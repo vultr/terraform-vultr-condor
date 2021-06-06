@@ -30,7 +30,7 @@ module "k0s" {
     {
       port    = 6443
       ip_type = "v4"
-      source  = "0.0.0.0/32"
+      source  = "0.0.0.0/0"
     }
   ]
 }
@@ -64,7 +64,7 @@ The Control Plane LB Firewall is configured to allow only what is needed by the 
     {
       port    = 6443
       ip_type = "v4"
-      source  = "0.0.0.0/32"
+      source  = "0.0.0.0/0"
     }
   ]
 ```
@@ -77,3 +77,6 @@ The cluster nodes(control plane and workers) Vultr Firewall defaults to allowing
 You may deploy any Kubernetes manifests automatically with the [K0s Manifest Deployer](https://docs.k0sproject.io/v1.21.1+k0s.0/manifests/#manifest-deployer) by placing your manifests in the `/var/lib/k0s/manifests` directory. Doing so via this module is not supported, however you may use the resulting `controller_ips` module output as arguments to a separate module that copies your manifests to the specified directory(or as stated in the linked K0s docs, a "stack" subdirectory).
 
 Please note the [Helm Chart Deployer](https://docs.k0sproject.io/v1.21.1+k0s.0/helm-charts/#helm-charts) is not currently supported by this module. 
+
+## Limitations
+* Shrinking of the Control Plane is not supported, only growing. You will need to manually run `k0s etcd leave` on all Control Plane nodes with index > 0 prior to shrinking the `controller_count`. An initial attempt was made to implement this in a destroy time provisioner, however it caused issues when running `terraform destroy` to destroy the entire plan. This may be revisited at a later date. 

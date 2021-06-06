@@ -152,6 +152,17 @@ resource "vultr_firewall_rule" "ssh" {
   notes             = "Allow SSH to all cluster nodes globally."
 }
 
+resource "vultr_firewall_rule" "etcd" {
+  count             = var.controller_count
+  firewall_group_id = vultr_firewall_group.cluster.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = vultr_instance.control_plane[count.index].main_ip
+  subnet_size       = 32
+  port              = "2380"
+  notes             = "Allow Etcd for Control Plane members."
+}
+
 resource "vultr_instance" "control_plane" {
   count               = var.controller_count
   plan                = var.controller_plan
@@ -319,6 +330,8 @@ EOT
 }
 
 resource "null_resource" "vultr_extensions" {
+  count = var.controller_count
+
   triggers = {
     api_key     = var.cluster_vultr_api_key
     ccm_version = var.vultr_ccm_version
@@ -328,7 +341,7 @@ resource "null_resource" "vultr_extensions" {
   connection {
     type = "ssh"
     user = "root"
-    host = vultr_instance.control_plane[0].main_ip
+    host = vultr_instance.control_plane[count.index].main_ip
   }
 
   provisioner "remote-exec" {
@@ -519,12 +532,12 @@ resource "null_resource" "vultr_extensions" {
                         name: vultr-ccm
                         key: api-key
     EOT
-    destination = "/var/lib/k0s/manifests/vultr/vultr-ccm-${var.vultr_ccm_version}.yml"
+    destination = "/var/lib/k0s/manifests/vultr/vultr-ccm-${var.vultr_ccm_version}.yaml"
   }
 
   provisioner "remote-exec" {
     inline = [
-      "wget https://raw.githubusercontent.com/vultr/vultr-csi/master/docs/releases/${var.vultr_csi_version}.yml -O /var/lib/k0s/manifests/vultr/csi-${var.vultr_csi_version}.yml"
+      "wget https://raw.githubusercontent.com/vultr/vultr-csi/master/docs/releases/${var.vultr_csi_version}.yml -O /var/lib/k0s/manifests/vultr/vultr-csi-${var.vultr_csi_version}.yaml"
     ]
   }
 }
@@ -533,6 +546,10 @@ resource "null_resource" "kubeconfig" {
   depends_on = [
     null_resource.k0s
   ]
+
+  triggers = {
+    cluster = null_resource.k0s.id
+  }
 
   count = var.write_kubeconfig ? 1 : 0
 
