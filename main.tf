@@ -54,11 +54,31 @@ resource "vultr_load_balancer" "control_plane_ha" {
     backend_port      = 6443
   }
 
+  dynamic "firewall_rules" {
+    for_each = vultr_instance.worker
+    iterator = instance
+    content {
+      port    = 6443
+      ip_type = "v4"
+      source  = "${instance.value["main_ip"]}/32"
+    }
+  }
+
   forwarding_rules {
     frontend_protocol = "tcp"
     frontend_port     = 8132
     backend_protocol  = "tcp"
     backend_port      = 8132
+  }
+
+  dynamic "firewall_rules" {
+    for_each = vultr_instance.worker
+    iterator = instance
+    content {
+      port    = 8132
+      ip_type = "v4"
+      source  = "${instance.value["main_ip"]}/32"
+    }
   }
 
   forwarding_rules {
@@ -68,11 +88,31 @@ resource "vultr_load_balancer" "control_plane_ha" {
     backend_port      = 8133
   }
 
+  dynamic "firewall_rules" {
+    for_each = vultr_instance.worker
+    iterator = instance
+    content {
+      port    = 8133
+      ip_type = "v4"
+      source  = "${instance.value["main_ip"]}/32"
+    }
+  }
+
   forwarding_rules {
     frontend_protocol = "tcp"
     frontend_port     = 9443
     backend_protocol  = "tcp"
     backend_port      = 9443
+  }
+
+  dynamic "firewall_rules" {
+    for_each = var.control_plane_firewall_rules
+    iterator = rule
+    content {
+      port    = rule.value["port"]
+      ip_type = rule.value["ip_type"]
+      source  = rule.value["source"]
+    }
   }
 
   health_check {
@@ -89,6 +129,16 @@ resource "vultr_load_balancer" "control_plane_ha" {
 
 resource "vultr_firewall_group" "cluster" {
   description = "Firewall group for k0s cluster ${random_id.cluster.hex}"
+}
+
+resource "vultr_firewall_rule" "ssh" {
+  firewall_group_id = vultr_firewall_group.cluster.id
+  protocol          = "tcp"
+  ip_type           = "v4"
+  subnet            = "0.0.0.0"
+  subnet_size       = 0
+  port              = "22"
+  notes             = "Allow SSH to all cluster nodes globally."
 }
 
 resource "vultr_instance" "control_plane" {
@@ -465,5 +515,13 @@ resource "null_resource" "vultr_extensions" {
     inline = [
       "wget https://raw.githubusercontent.com/vultr/vultr-csi/master/docs/releases/${var.vultr_csi_version}.yml -O /var/lib/k0s/manifests/vultr/csi-${var.vultr_csi_version}.yml"
     ]
+  }
+}
+
+resource "null_resource" "kubeconfig" {
+  count = var.write_kubeconfig ? 1 : 0
+
+  provisioner "local-exec" {
+    command = "k0sctl kubeconfig > admin.conf"
   }
 }
