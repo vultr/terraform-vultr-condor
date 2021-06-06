@@ -6,7 +6,7 @@
 ### Changes
 * Add variable descriptions.
 * Lock up cluster firewall, SSH only by default. 
-* Cluster Firewall and Control Plane VLB Firewall documentation.
+* Docs updates.
 ### Fixes
 * README markdown.
 
