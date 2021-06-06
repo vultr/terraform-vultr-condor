@@ -23,13 +23,20 @@ Usage and input details can be found in the [Terraform Module Registry Docs](htt
 # main.tf
 
 module "k0s" {
-  source                 = "3letteragency/k0s/vultr"
-  version                = "1.0.1"
-  provisioner_public_key = chomp(file("~/.ssh/id_rsa.pub")) 
-  cluster_vultr_api_key  = "<vultr-api-key>" # 
+  source                 = "../"
+  provisioner_public_key = chomp(file("~/.ssh/id_rsa.pub"))
+  cluster_vultr_api_key  = var.cluster_vultr_api_key
+  control_plane_firewall_rules = [
+    {
+      port    = 6443
+      ip_type = "v4"
+      source  = "0.0.0.0/32"
+    }
+  ]
 }
 ```
-  * Note, passing the Cluster API Key as plain text is not recommended for anything beyond testing, use an environment variable as described [here](https://www.terraform.io/docs/cli/config/environment-variables.html#tf_var_name).
+  * The Control Plane Firewall rule in this example exposes the Kubernetes API globally, it is recommended you configure a more restrictive rule or rules on production clusters. 
+  * Passing the Cluster API Key as plain text is not recommended for anything beyond testing, use an environment variable as described [here](https://www.terraform.io/docs/cli/config/environment-variables.html#tf_var_name).
 
 2) Configure any [Optional Inputs](https://registry.terraform.io/modules/vultr/condor/vultr/latest?tab=inputs#optional-inputs) if you wish to change from the defaults.
 
@@ -48,3 +55,25 @@ $ k0sctl kubeconfig > /path/to/admin.conf
 kubectl --kubeconfig admin.conf get no 
 kubectl --kubeconfig admin.conf get po -n kube-system
 ```
+
+## Firewall Configuration
+### Control Plane HA VLB Firewall
+The Control Plane LB Firewall is configured to allow only what is needed by the cluster as described in the [K0s Networking Docs](https://docs.k0sproject.io/v1.21.1+k0s.0/networking/#required-ports-and-protocols) by default. The Kubernetes API will not be accessible without configuring an additional rule or rules(as shown in the quickstart example) via the `control_plane_firewall_rules` input variable. E.g.:
+``` hcl
+  control_plane_firewall_rules = [
+    {
+      port    = 6443
+      ip_type = "v4"
+      source  = "0.0.0.0/32"
+    }
+  ]
+```
+As also stated in the quickstart, this example rule exposes the Kubernetes API globally, your rules should be more restrictive for production clusters.
+
+### Cluster Nodes Vultr Firewall
+The cluster nodes(control plane and workers) Vultr Firewall defaults to allowing only SSH globally. This is generally acceptable, however if you would like to restrict access further you may disable this rule by setting the `allow_ssh` input variable to `false` then configuring the desired rule/rules outside of this module using the `cluster_firewall_group_id` output in your rules. 
+
+## Extensions
+You may deploy any Kubernetes manifests automatically with the [K0s Manifest Deployer](https://docs.k0sproject.io/v1.21.1+k0s.0/manifests/#manifest-deployer) by placing your manifests in the `/var/lib/k0s/manifests` directory. Doing so via this module is not supported, however you may use the resulting `controller_ips` module output as arguments to a separate module that copies your manifests to the specified directory(or as stated in the linked K0s docs, a "stack" subdirectory).
+
+Please note the [Helm Chart Deployer](https://docs.k0sproject.io/v1.21.1+k0s.0/helm-charts/#helm-charts) is not currently supported by this module. 

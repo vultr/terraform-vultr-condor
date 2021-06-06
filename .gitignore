@@ -7,3 +7,4 @@ admin.conf
 k0sctl.yaml
 terraform.tfstate*
 .terraform
+.terraform.tfstate.lock.info

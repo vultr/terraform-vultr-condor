@@ -6,7 +6,7 @@ module "k0s" {
     {
       port    = 6443
       ip_type = "v4"
-      source  = "73.178.251.33/32"
+      source  = "0.0.0.0/32"
     }
   ]
 }

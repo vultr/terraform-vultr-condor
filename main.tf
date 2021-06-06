@@ -106,6 +106,16 @@ resource "vultr_load_balancer" "control_plane_ha" {
   }
 
   dynamic "firewall_rules" {
+    for_each = vultr_instance.control_plane
+    iterator = instance
+    content {
+      port    = 9443
+      ip_type = "v4"
+      source  = "${instance.value["main_ip"]}/32"
+    }
+  }
+
+  dynamic "firewall_rules" {
     for_each = var.control_plane_firewall_rules
     iterator = rule
     content {
@@ -132,6 +142,7 @@ resource "vultr_firewall_group" "cluster" {
 }
 
 resource "vultr_firewall_rule" "ssh" {
+  count             = var.allow_ssh ? 1 : 0
   firewall_group_id = vultr_firewall_group.cluster.id
   protocol          = "tcp"
   ip_type           = "v4"
@@ -519,6 +530,10 @@ resource "null_resource" "vultr_extensions" {
 }
 
 resource "null_resource" "kubeconfig" {
+  depends_on = [
+    null_resource.k0s
+  ]
+
   count = var.write_kubeconfig ? 1 : 0
 
   provisioner "local-exec" {
