@@ -34,7 +34,8 @@ Usage and input details can be found in the [Terraform Module Registry Docs](htt
 # main.tf
 
 module "k0s" {
-  source                 = "../"
+  source                 = "3letteragency/k0s/vultr"
+  version                = "1.1.0"
   provisioner_public_key = chomp(file("~/.ssh/id_rsa.pub"))
   cluster_vultr_api_key  = var.cluster_vultr_api_key
   control_plane_firewall_rules = [
