@@ -209,3 +209,13 @@ variable "allow_ssh" {
   type        = bool
   default     = true
 }
+
+variable "helm_repositories" {
+  type    = list(map(any))
+  default = []
+}
+
+variable "helm_charts" {
+  type    = list(map(any))
+  default = []
+}

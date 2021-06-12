@@ -32,7 +32,7 @@ ufw reload
 
 cat <<-EOF > /etc/systemd/network/public.network
   [Match]
-  Name=ens3
+  Name=enp1s0
 
   [Network]
   DHCP=yes
@@ -40,7 +40,7 @@ EOF
 
 cat <<-EOF > /etc/systemd/network/private.network
   [Match]
-  Name=ens7
+  Name=enp6s0
 
   [Network]
   Address=$INTERNAL_IP

@@ -10,6 +10,112 @@ terraform {
 locals {
   cluster_name = "${var.cluster_name}-${random_id.cluster.hex}"
   public_keys  = concat([vultr_ssh_key.provisioner.id], vultr_ssh_key.extra_public_keys.*.id)
+  k0sctl_controllers = [
+    for host in vultr_instance.control_plane :
+    {
+      role = "controller"
+      installFlags = [
+        "--enable-cloud-provider=true"
+      ]
+      privateAddress = host.internal_ip
+      ssh = {
+        address = host.main_ip
+        user    = "root"
+        port    = 22
+      }
+    }
+  ]
+  k0sctl_workers = [
+    for host in vultr_instance.worker :
+    {
+      role = "worker"
+      installFlags = [
+        "--enable-cloud-provider=true"
+      ]
+      privateAddress = host.internal_ip
+      ssh = {
+        address = host.main_ip
+        user    = "root"
+        port    = 22
+      }
+    }
+  ]
+  k0sctl_conf = {
+    apiVersion = "k0sctl.k0sproject.io/v1beta1"
+    kind       = "Cluster"
+    metadata = {
+      name = local.cluster_name
+    }
+    spec = {
+      hosts = concat(local.k0sctl_controllers, local.k0sctl_workers)
+      k0s = {
+        version = var.k0s_version
+        config = {
+          apiVersion = "k0s.k0sproject.io/v1beta1"
+          kind       = "Cluster"
+          metadata = {
+            name = local.cluster_name
+          }
+          spec = {
+            extensions = {
+              helm = {
+                repositories = var.helm_repositories
+                charts       = var.helm_charts
+              }
+            }
+            telemetry = {
+              enabled = false
+            }
+            api = {
+              port            = 6443
+              k0sApiPort      = 9443
+              externalAddress = vultr_load_balancer.control_plane_ha.ipv4
+              address         = vultr_load_balancer.control_plane_ha.ipv4
+              sans = [
+                vultr_load_balancer.control_plane_ha.ipv4
+              ]
+            }
+            network = {
+              podCIDR     = var.pod_cidr
+              serviceCIDR = var.svc_cidr
+              "provider"  = "calico"
+              calico = {
+                wireguard = var.calico_wireguard
+              }
+            }
+            podSecurityPolicy = {
+              defaultPolicy = var.pod_sec_policy
+            }
+            images = {
+              konnectivity = {
+                image   = "us.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-agent"
+                version = var.konnectivity_version
+              }
+              metricsserver = {
+                image   = "gcr.io/k8s-staging-metrics-server/metrics-server"
+                version = var.metrics_server_version
+              }
+              kubeproxy = {
+                image   = "k8s.gcr.io/kube-proxy"
+                version = var.kube_proxy_version
+              }
+              coredns = {
+                image   = "docker.io/coredns/coredns"
+                version = var.core_dns_version
+              }
+              calico = {
+                cni = {
+                  image   = "calico/cni"
+                  version = var.calico_version
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  config_sha256sum = sha256(tostring(jsonencode(local.k0sctl_conf)))
 }
 
 data "vultr_os" "cluster" {
@@ -241,88 +347,16 @@ resource "null_resource" "k0s" {
   ]
 
   triggers = {
-    k0s_version            = var.k0s_version
-    controller_count       = var.controller_count
-    konnectivity_version   = var.konnectivity_version
-    metrics_server_version = var.metrics_server_version
-    kube_proxy_version     = var.kube_proxy_version
-    core_dns_version       = var.core_dns_version
-    calico_version         = var.calico_version
+    controller_count = var.controller_count
+    worker_count     = var.worker_count
+    config           = local.config_sha256sum
   }
 
   provisioner "local-exec" {
     command = <<-EOT
       cat <<-EOF > k0sctl.yaml
-        apiVersion: k0sctl.k0sproject.io/v1beta1
-        kind: Cluster
-        metadata:
-          name: ${local.cluster_name}
-        spec:
-          hosts:
-          %{for host in vultr_instance.control_plane}
-          - role: controller
-            installFlags:
-            - --enable-cloud-provider=true
-            privateAddress: ${host.internal_ip}
-            ssh:
-              address: ${host.main_ip}
-              user: root
-              port: 22
-          %{endfor~}
-          %{for host in vultr_instance.worker}
-          - role: worker
-            installFlags:
-            - --enable-cloud-provider=true
-            privateAddress: ${host.internal_ip}
-            ssh:
-              address: ${host.main_ip}
-              user: root
-              port: 22
-          %{endfor}
-          k0s:
-            version: ${var.k0s_version}
-            config:
-              apiVersion: k0s.k0sproject.io/v1beta1
-              kind: Cluster
-              metadata:
-                name: ${local.cluster_name}
-              spec:
-                telemetry:
-                  enabled: false
-                api:
-                  port: 6443
-                  k0sApiPort: 9443
-                  externalAddress: ${vultr_load_balancer.control_plane_ha.ipv4}
-                  address: ${vultr_load_balancer.control_plane_ha.ipv4}
-                  sans:
-                    - ${vultr_load_balancer.control_plane_ha.ipv4}
-                network:
-                  podCIDR: ${var.pod_cidr}
-                  serviceCIDR: ${var.svc_cidr}
-                  provider: calico
-                  calico:
-                    wireguard: ${var.calico_wireguard}
-                podSecurityPolicy:
-                  defaultPolicy: ${var.pod_sec_policy}
-                images:
-                  konnectivity:
-                    image: us.gcr.io/k8s-artifacts-prod/kas-network-proxy/proxy-agent
-                    version: ${var.konnectivity_version}
-                  metricsserver:
-                    image: gcr.io/k8s-staging-metrics-server/metrics-server
-                    version: ${var.metrics_server_version}
-                  kubeproxy:
-                    image: k8s.gcr.io/kube-proxy
-                    version: ${var.kube_proxy_version}
-                  coredns:
-                    image: docker.io/coredns/coredns
-                    version: ${var.core_dns_version}
-                  calico:
-                    cni:
-                      image: calico/cni
-                      version: ${var.calico_version}
+      ${yamlencode(local.k0sctl_conf)}
       EOF
-
       k0sctl apply
 
 EOT
