@@ -1,4 +1,10 @@
 # Change Log
+## [v1.2.1](https://github.com/3letteragency/terraform-vultr-k0s/releases/tag/v1.2.1) (2021-06-19)
+### Changes
+* Template Vultr CSI 
+* Add Vultr CSI image/version vars
+* Add kubeconfig filename tf workspace suffix
+
 ## [v1.2.0](https://github.com/3letteragency/terraform-vultr-k0s/releases/tag/v1.2.0) (2021-06-12)
 ### Features
 * Support K0s Helm deployments.
