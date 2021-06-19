@@ -219,3 +219,8 @@ variable "helm_charts" {
   type    = list(map(any))
   default = []
 }
+
+variable "vultr_csi_image" {
+  type    = string
+  default = "vultr/vultr-csi"
+}
