@@ -813,7 +813,7 @@ resource "null_resource" "vultr_extensions" {
                   - name: registration-dir
                     mountPath: /registration/
               - name: csi-vultr-plugin
-                image: ${var.vultr_csi_image}:${local.vultr_csi_version}
+                image: ${var.vultr_csi_image}:${var.vultr_csi_version}
                 args:
                   - "--endpoint=$(CSI_ENDPOINT)"
                 env:
