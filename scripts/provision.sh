@@ -24,7 +24,7 @@ case $NODE_ROLE in
         ufw allow 4789/udp
         ufw allow 8132:8133/tcp
         ufw allow 30000:32767/tcp
-        ufw allow in on ens7
+        ufw allow in on enp6s0
     ;;
 esac
 
