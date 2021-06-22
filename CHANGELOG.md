@@ -1,4 +1,8 @@
 # Change Log
+## [v1.2.2](https://github.com/3letteragency/terraform-vultr-k0s/releases/tag/v1.2.2) (2021-06-21)
+### Fixes
+* Fix firewall configuration after Vultr image changes. 
+
 ## [v1.2.1](https://github.com/3letteragency/terraform-vultr-k0s/releases/tag/v1.2.1) (2021-06-19)
 ### Changes
 * Template Vultr CSI 
