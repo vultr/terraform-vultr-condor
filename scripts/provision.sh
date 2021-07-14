@@ -1,6 +1,21 @@
 #!/usr/bin/env bash
 set -euxo posix
 
+safe_apt(){
+	while fuser /var/{lib/{dpkg,apt/lists},cache/apt/archives}/lock >/dev/null 2>&1 ; do
+		echo "Waiting for apt lock..."
+		sleep 1
+	done
+	apt "$@"
+}
+
+safe_apt -y update
+safe_apt -y install jq
+
+PUBLIC_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[0].mac')
+PUBLIC_NIC=$(ip -j link | jq --arg PUBLIC_MAC $PUBLIC_MAC '.[] | select(.address==$PUBLIC_MAC)' | jq -r .ifname)
+INTERNAL_MAC=$(curl --silent 169.254.169.254/v1.json | jq -r '.interfaces[1].mac')
+INTERNAL_NIC=$(ip -j link | jq --arg INTERNAL_MAC $INTERNAL_MAC '.[] | select(.address==$INTERNAL_MAC)' | jq -r .ifname)
 INTERNAL_IP=$1
 CONTROL_PLANE_PORTS=(6443 2379 2380 10250 10251 10252 8132 8133 9443)
 
@@ -14,7 +29,7 @@ case $NODE_ROLE in
     controller)
         for port in "${CONTROL_PLANE_PORTS[@]}"; do
             ufw allow $port
-            ufw allow in on ens7
+            ufw allow in on $INTERNAL_NIC
         done
     ;;
     worker)
@@ -24,7 +39,7 @@ case $NODE_ROLE in
         ufw allow 4789/udp
         ufw allow 8132:8133/tcp
         ufw allow 30000:32767/tcp
-        ufw allow in on enp6s0
+        ufw allow in on $INTERNAL_NIC
     ;;
 esac
 
@@ -32,7 +47,7 @@ ufw reload
 
 cat <<-EOF > /etc/systemd/network/public.network
   [Match]
-  Name=enp1s0
+  MACAddress=$PUBLIC_MAC
 
   [Network]
   DHCP=yes
@@ -40,7 +55,7 @@ EOF
 
 cat <<-EOF > /etc/systemd/network/private.network
   [Match]
-  Name=enp6s0
+  MACAddress=$INTERNAL_MAC
 
   [Network]
   Address=$INTERNAL_IP
