@@ -1,4 +1,8 @@
 # Change Log
+## [v1.2.3](https://github.com/3letteragency/terraform-vultr-k0s/releases/tag/v1.2.3) (2021-07-14)
+### Fixes
+* Handle dynamic NIC names.
+
 ## [v1.2.2](https://github.com/3letteragency/terraform-vultr-k0s/releases/tag/v1.2.2) (2021-06-21)
 ### Fixes
 * Fix firewall configuration after Vultr image changes. 
