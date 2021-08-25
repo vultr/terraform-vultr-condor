@@ -83,7 +83,7 @@ locals {
               serviceCIDR = var.svc_cidr
               "provider"  = "calico"
               calico = {
-                wireguard = var.calico_wireguard
+                mode = var.calico_mode
               }
             }
             podSecurityPolicy = {

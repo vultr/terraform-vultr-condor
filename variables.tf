@@ -105,12 +105,6 @@ variable "svc_cidr" {
   default     = "10.96.0.0/12"
 }
 
-variable "calico_wireguard" {
-  description = "Enable/disable Calico Wireguard."
-  type        = bool
-  default     = true
-}
-
 variable "pod_sec_policy" {
   description = "K0s Pod Security Policy."
   type        = string
@@ -120,7 +114,7 @@ variable "pod_sec_policy" {
 variable "konnectivity_version" {
   description = "K0s Configuration Konnectivity Version."
   type        = string
-  default     = "v0.0.13"
+  default     = "v0.0.16"
 }
 
 variable "metrics_server_version" {
@@ -132,7 +126,7 @@ variable "metrics_server_version" {
 variable "kube_proxy_version" {
   description = "K0s Configuration Kube Proxy version."
   type        = string
-  default     = "v1.21.1"
+  default     = "v1.21.3"
 }
 
 variable "core_dns_version" {
@@ -144,7 +138,7 @@ variable "core_dns_version" {
 variable "calico_version" {
   description = "K0s Configuration Calico version."
   type        = string
-  default     = "v3.16.2"
+  default     = "v3.18.1"
 }
 
 variable "cluster_os" {
@@ -168,7 +162,7 @@ variable "controller_plan" {
 variable "k0s_version" {
   description = "K0s Configuration K0s version."
   type        = string
-  default     = "v1.21.1+k0s.0"
+  default     = "v1.21.3+k0s.0"
 }
 
 variable "write_kubeconfig" {
@@ -223,4 +217,9 @@ variable "helm_charts" {
 variable "vultr_csi_image" {
   type    = string
   default = "vultr/vultr-csi"
+}
+
+variable "calico_mode" {
+  type    = string
+  default = "bird"
 }
