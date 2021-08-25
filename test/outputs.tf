@@ -31,5 +31,5 @@ output "worker_ips" {
 }
 
 output "worker_ids" {
-  value =  module.k0s.worker_ids
+  value = module.k0s.worker_ids
 }
