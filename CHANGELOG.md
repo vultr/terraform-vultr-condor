@@ -1,4 +1,12 @@
 # Change Log
+## [v1.3.0](https://github.com/3letteragency/terraform-vultr-k0s/releases/tag/v1.3.0) (2021-08-25)
+### Breaking Changes
+* Remove `calico_wireguard` variable - nodes were not properly configured, will need to revisit
+* Add `calico_mode` variable - previously defaulted to `vxlan`, is now configurable but defaults to `bird`
+### Changes
+* Bump K0s release from `v1.21.1+k0s.0` to `v1.21.3+k0s.0`
+* Bump kube-system component versions
+
 ## [v1.2.3](https://github.com/3letteragency/terraform-vultr-k0s/releases/tag/v1.2.3) (2021-07-14)
 ### Fixes
 * Handle dynamic NIC names.
