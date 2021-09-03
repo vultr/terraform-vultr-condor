@@ -59,7 +59,7 @@ module "condor" {
 $ terraform init && terraform apply
 ```
 
-4) The Admin Kubeconfig is written locally to your working directory by default. This may not be desireable in some scenarios, e.g. running Terraform in automation(CI/CD pipelines). If you wish to change this set the `write_kubeconfig` variable to false. If you wish to retreive the kubeconfig manually, you can run the following after your cluster has been deployed:
+4) The Admin Kubeconfig is written locally to your working directory by default as `admin-<terraform-workspace>.conf`. This may not be desireable in some scenarios, e.g. running Terraform in automation(CI/CD pipelines). If you wish to change this set the `write_kubeconfig` variable to false. If you wish to retreive the kubeconfig manually, you can run the following after your cluster has been deployed:
 ``` sh
 $ k0sctl kubeconfig > /path/to/admin.conf
 ```
