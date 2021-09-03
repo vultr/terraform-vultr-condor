@@ -1,6 +1,6 @@
-# Vultr k0s
+# Condor
 
-[Terraform Module Registry Docs](https://registry.terraform.io/modules/3letteragency/k0s/vultr/latest)
+[Terraform Module Registry Docs](https://registry.terraform.io/modules/vultr/condor/vultr/latest)
 
 ## Table of Contents
 * [Requirements](#requirements)
@@ -29,15 +29,15 @@
   * Installs the [Vultr CSI](https://github.com/vultr/vultr-csi)
 
 ## Quick Start
-Usage and input details can be found in the [Terraform Module Registry Docs](https://registry.terraform.io/modules/3letteragency/k0s/vultr/latest), or use the quickstart below.
+Usage and input details can be found in the [Terraform Module Registry Docs](https://registry.terraform.io/modules/vultr/condor/vultr/latest), or use the quickstart below.
 
-1) Create a `main.tf` file with the [Required Inputs](https://registry.terraform.io/modules/3letteragency/k0s/vultr/latest?tab=inputs#required-inputs):
+1) Create a `main.tf` file with the [Required Inputs](https://registry.terraform.io/modules/vultr/condor/vultr/latest?tab=inputs#required-inputs):
 ``` hcl
 # main.tf
 
-module "k0s" {
-  source                 = "3letteragency/k0s/vultr"
-  version                = "1.3.0"
+module "condor" {
+  source                 = "vultr/condor/vultr"
+  version                = "2.0.0"
   provisioner_public_key = chomp(file("~/.ssh/id_rsa.pub"))
   cluster_vultr_api_key  = var.cluster_vultr_api_key
   control_plane_firewall_rules = [

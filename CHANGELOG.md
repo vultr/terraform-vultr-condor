@@ -1,4 +1,14 @@
 # Change Log
+## [v2.0.0](https://github.com/vultr/terraform-vultr-condor/releases/tag/v2.0.0) (2021-09-03)
+### Breaking Changes
+* Condor is now based on Mirantis K0s rather than Kubeadm, as such v2 is completely incompatible with previous releases.
+### Features
+* HA Control Plane
+* Isolated control plane(Control Plane nodes are not part of the cluster)
+* Control Plane and Worker Node firewalls. 
+* Declarative cluster and component(Vultr CCM, CSI, Calico, etc.) upgrades
+* K0s manifest deployer support 
+
 ## [v1.3.0](https://github.com/3letteragency/terraform-vultr-k0s/releases/tag/v1.3.0) (2021-08-25)
 ### Breaking Changes
 * Remove `calico_wireguard` variable - nodes were not properly configured, will need to revisit
