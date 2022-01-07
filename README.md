@@ -11,7 +11,7 @@
 * [Extensions](#extensions)
   * [Helm](#helm)
   * [Manifest Bundles](#manifest-bundles)
-* [Limitagions](#limitagions)
+* [Limitations](#limitations)
 
 ## Requirements
   * A funded Vultr account and API Key, should be configured as an environment variable to be consumed by the Terraform provider:
@@ -106,7 +106,7 @@ Helm Repositories and Charts may be configured/deployed during initial cluster i
     }
   ]
 ```
-Please see the [Helm Chart Deployer](https://docs.k0sproject.io/v1.21.3+k0s.0/helm-charts/#helm-charts) docs for a comprehensive list of field/parameter values and further details. Note, this feature entails [Limitagions](#limitagions).
+Please see the [Helm Chart Deployer](https://docs.k0sproject.io/v1.21.3+k0s.0/helm-charts/#helm-charts) docs for a comprehensive list of field/parameter values and further details. Note, this feature entails [Limitations](#limitations).
 
 ### Manifest Bundles
 You may deploy any Kubernetes manifests automatically with the [K0s Manifest Deployer](https://docs.k0sproject.io/v1.21.1+k0s.0/manifests/#manifest-deployer) by placing your manifests in the `/var/lib/k0s/manifests` directory. Doing so via this module is not supported, however you may use the resulting `controller_ips` module output as arguments to a separate module that copies your manifests to the specified directory(or as stated in the linked K0s docs, a "stack" subdirectory).
